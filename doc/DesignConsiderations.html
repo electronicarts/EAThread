@@ -1,0 +1,85 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head><title>Design Considerations</title>
+<style type="text/css">
+<!--
+.style1 {font-family: "Courier New", Courier, mono}
+-->
+</style>
+</head><body>
+<h1>Design Considerations</h1>
+<h3>Design</h3>
+<p>Many of the design criteria for EA::Thread is based on the design of
+  the Posix threading standard. The Posix threading standard is designed
+  to work portably on a wide range of operating systems and hardware,
+  including embedded systems and realtime environments. As such, Posix
+  threads generally represent a competent model to follow where possible.
+  Windows and various other platforms have independent multi-threading
+  systems which are taken into account here as well. If something exists
+  in Windows but doesn't exist here (e.g. Thread suspend/resume), there
+  is a decent chance that it is by design and for some good reason.</p>
+<h3>C++</h3>
+<p>There are a number of C++ libraries devoted to multithreading. Usually
+  the goal of these libraries is provide a platform independent interface
+  which simplifies the most common usage patterns and helps prevent
+  common errors. Some of these libraries are basic wrappers around
+  existing C APIs while others (e.g. ZThreads) provide a new and
+  different paradigm. We take the former approach here, as it is provides
+  more or less the same functionality but provides it in a
+  straightforward way that is easily approached by those familiar with
+  platform-specific APIs. This approach has been referred to as the "Wrapper Facade Pattern".</p>
+<h3>Condition Variables / Monitors</h3>
+<p>Posix condition variables are implemented via the Condition class.
+  For all practical purposes, "monitor" is the Java and C# name for Posix' condition variables. To
+  some, a condition variable may seem similar to a Win32 Signal. In
+  actuality they are similar but there is one critical difference: a
+  Signal does not atomically unlock a mutex as part of the signaling
+  process. This results in problematic race conditions that make reliable
+  producer/consumer systems impossible to implement correctly.</p>
+<h3>Events / Signals</h3>
+<p>EAThread
+  doesn't have an Event or Signal because it is not useful for most
+  practical
+  situations. You usually instead want to use a Semaphore or Condition.
+  An
+  Event as defined by Windows is not the same thing as a Condition
+  (condition variable) and
+  cannot be safely used in its place. Events cannot be used to do what a
+  Condition does primarily due to race conditions. There may nevertheless
+  be some use for events, though they won't be implemented in EAThread
+  until and unless deemed useful. Given that Posix threading has
+  undergone numerous scrutinized revisions without adding an event
+  system, it is probably arguable that events are not necessary. A
+  publicly available discussion on the topic of implementing events under
+  Posix threads which could be applied to EAThread is here: <a href="http://developers.sun.com/solaris/articles/waitfor_api.html">http://developers.sun.com/solaris/articles/waitfor_api.html</a>. Check the EAThread package's scrap directory for a possible implementation of events in EAThread in the future.</p>
+<h3>Timeouts</h3>
+<p>Timeouts are specified as absolute times and not relative times. This
+  may not be how Win32 threading works but it is what's proper and is how
+  Posix threading works. From the OpenGroup <a href="http://www.opengroup.org/onlinepubs/007904975/functions/pthread_cond_wait.html">online</a> pthread (Posix) documentation:<br>
+</p>
+<div style="margin-left: 40px;"> An absolute time measure was chosen for
+specifying the timeout parameter for two reasons. First, a relative
+time measure can be easily implemented on top of a function that
+specifies absolute time, but there is a race condition associated with
+specifying an absolute timeout on top of a function that specifies
+relative timeouts. For example, assume that clock_gettime() returns the
+current time and cond_relative_timed_wait() uses relative timeouts:<br>
+<br>
+<span class="style1">&nbsp;&nbsp; clock_gettime(CLOCK_REALTIME, &amp;now);<br style="font-family: monospace;">
+&nbsp;&nbsp; reltime = sleep_til_this_absolute_time - now;<br style="font-family: monospace;">
+&nbsp;&nbsp; cond_relative_timed_wait(c, m, &amp;reltime);<br>
+</span><br style="font-family: monospace;">
+If the thread is preempted between the first statement and the
+last statement, the thread blocks for too long. Blocking, however, is
+irrelevant if an absolute timeout is used. An absolute timeout also
+need not be recomputed if it is used multiple times in a loop, such as
+that enclosing a condition wait. For cases when the system clock is
+advanced discontinuously by an operator, it is expected that
+implementations process any timed wait expiring at an intervening time
+as if that time had actually occurred.<br>
+</div>
+<br>
+<br>
+<br>
+
+
+</body></html>

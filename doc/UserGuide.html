@@ -1,0 +1,364 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+<style type="text/css">
+<!--
+.style1 {font-family: "Courier New", Courier, mono}
+-->
+</style>
+</head>
+<body>
+<h1>User Guide</h1>
+<h3>Introduction</h3>
+<p>This document provides a brief description of the EAThread modules and
+    then provides some basic information on using these modules. You will
+    want to consult documentation for individual modules for more detailed
+information about them. </p>
+<p>All code is in C++ and largely follows the EA coding guidelines as of
+    January of 2004. All classes are in the EA::Thread C++ namespace.
+    Thus, the fully qualified name of the Mutex class is
+    EA::Thread::Mutex. Most of the code is plain C++ and
+    doesn't attempt to be very academic with the language. Thus RTTI is not
+    used, template usage is used only in one module (FixedAllocator),
+    exception handling is not used, etc. Unit tests have been set up for
+    most of the functionality and are available with the full package. The
+    headers are heavily commented in Doxygen-savvy format and the source
+code for the primary modules has been heavily commented as well. </p>
+<h3>EAThread Modules<span style="font-weight: bold;"></span>
+</h3>
+<div style="margin-left: 40px;">
+  <table style="text-align: left; width: 100%;" border="1" cellpadding="2" cellspacing="2">
+    <tbody> 
+    <tr>
+      <td style="vertical-align: top;" valign="top"><span style="font-weight: bold;">Module</span><br>
+      </td>
+      <td style="vertical-align: top;" valign="top"><span style="font-weight: bold;">Description</span></td>
+      <td style="vertical-align: top;" valign="top"><span style="font-weight: bold;">Source</span><br>
+      </td>
+      <td style="vertical-align: top;" valign="top"><span style="font-weight: bold;">Dependencies</span><br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;" valign="top">Thread<br>
+      </td>
+      <td style="vertical-align: top;" valign="top"> Implements the creation and 
+        control of individual threads. <br>
+</td>
+      <td style="vertical-align: top;" valign="top">eathread.h/cpp<br>
+eathread_thread.h/cpp<br>
+</td>
+      <td style="vertical-align: top;" valign="top">EABase</td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;" valign="top">Storage<br>
+      </td>
+      <td style="vertical-align: top;" valign="top">Implements thread-specific 
+        storage (a.k.a. thread-local storage). This is a mechanism whereby a given 
+        named global variable exists not once globally but exists once per thread. 
+        Each thread gets its own view of the variable. <br>
+      </td>
+      <td style="vertical-align: top;" valign="top">eathread_storage.h/cpp<br>
+      </td>
+      <td style="vertical-align: top;" valign="top">EABase<br>
+        eathead.h/cpp<br>
+        eathread_mutex.h/cpp*<br>
+      <br>
+      </td>
+    </tr>
+<tr>
+      <td style="vertical-align: top;" valign="top">Atomic</td>
+      <td style="vertical-align: top;" valign="top">Implements atomic operations 
+        on integers and pointers. These are useful for doing thread-safe basic 
+        operations and tests on integers or pointers without the cost of more 
+        expensive synchronization primitives such as mutexes.<br>
+</td>
+      <td style="vertical-align: top;" valign="top">eathread_atomic.h<br>
+</td>
+      <td style="vertical-align: top;" valign="top">EABase</td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;" valign="top">Mutex<br>
+</td>
+      <td style="vertical-align: top;" valign="top">Implements traditional mutual 
+        exclusion. Mutexes here encompass critical section functionality (a.k.a. 
+        futex) and traditional cross-process exclusion.<br>
+</td>
+      <td style="vertical-align: top;" valign="top">eathread_mutex.h/cpp<br>
+</td>
+      <td style="vertical-align: top;" valign="top">EABase<br>
+eathread.h/cpp<br>
+</td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;" valign="top">Futex</td>
+      <td style="vertical-align: top;" valign="top">Implements a fast mutex. A fast mutex is a mutex which can be faster because it acts entirely within user space within the current process and can possibly have some of its code inlined. </td>
+      <td style="vertical-align: top;" valign="top">eathread_futex.h/cpp</td>
+      <td style="vertical-align: top;" valign="top">EABase<br>
+eathread.h/cpp</td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;" valign="top">ReadWriteMutex<br>
+</td>
+      <td style="vertical-align: top;" valign="top">Implements a mutex that allows 
+        multiple concurrent reading threads but only one writing thread. This 
+        is useful for situations where one thread is updating a state but multiple 
+        threads may be reading that state.<br>
+</td>
+      <td style="vertical-align: top;" valign="top">eathread_rwmutex.h/cpp<br>
+</td>
+      <td style="vertical-align: top;" valign="top"><font size="-2"></font>EABase<br>
+        eathread.h/cpp<br>
+        eathread_atomic.h<br>
+        eathread_condition.h/cpp </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;" valign="top">Semaphore<br>
+</td>
+      <td style="vertical-align: top;" valign="top">Implements a traditional sempahore. 
+        A semaphore has zero or positive count associated with it; a thread can 
+        'grab' the semaphore if the count is greater than zero and grabbing it 
+        reduces its count by one. When the count is zero, threads must wait until 
+        it is incremented, which can be done arbitrarily. The semaphore is the 
+        primitive upon which all other high level primitives can be constructed.<br>
+</td>
+      <td style="vertical-align: top;" valign="top">eathread_semaphore.h/cpp<br>
+</td>
+      <td style="vertical-align: top;" valign="top">EABase<br>
+        eathread.h/cpp<br>
+        eathread_atomic.h<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;" valign="top">Condition<br>
+</td>
+      <td style="vertical-align: top;" valign="top">Implements a condition variable, 
+        which is a synchronization primitive that supports the producer/consumer 
+        pattern. It is for all practical purposes also known as a "monitor" in 
+        Java and C#. This primitive is particularly useful for implementing efficient 
+        cross thread-messaging systems or worker thread job implementations.<br>
+</td>
+      <td style="vertical-align: top;" valign="top">eathread_condition.h/cpp<br>
+</td>
+      <td style="vertical-align: top;" valign="top">EABase<br>
+        eathread.h/cpp<br>
+        eathread_atomic.h<br>
+        eathread_mutex.h/cpp eathread_semaphore.h/cpp<br>
+</td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;" valign="top">Barrier<br>
+      </td>
+      <td style="vertical-align: top;" valign="top">Implements a cyclic barrier 
+        primitive. A barrier is a primitive which coordinates the completion of 
+        work by a predetermined number of threads. A barrier has an integer max 
+        "height" and a current height associated with it. When a thread hits the 
+        barrier, it blocks until the prescribed number of threads hit the barrier, 
+        then all are freed.<br>
+      </td>
+      <td style="vertical-align: top;" valign="top">eathread_barrier.h/cpp<br>
+      </td>
+      <td style="vertical-align: top;" valign="top"> 
+        <p>EABase<br>
+          eathread.h/cpp<br>
+          eathread_atomic.h<br>
+          eathread_semaphore.h/cpp<br>
+        </p>
+        </td>
+    </tr>
+<tr>
+      <td style="vertical-align: top;" valign="top">SpinLock<br>
+</td>
+      <td style="vertical-align: top;" valign="top">Implements a traditional spin 
+        lock. A spin lock is a special kind of mutex that "spins" in a loop waiting 
+        to be able to continue instead of blocking like a mutex. A spinlock is 
+        more efficient than a mutex but it generally doesn't work unless operating 
+        on a true multi-processing system. When it does work on a true multi-processing 
+        system it is inefficient.<br>
+</td>
+      <td style="vertical-align: top;" valign="top">eathread_spinlock.h<br>
+</td>
+      <td style="vertical-align: top;" valign="top">EABase<br>
+        eathread.h/cpp<br>
+        eathread_sync.h <br>
+        eathread_atomic.h<br>
+</td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;" valign="top">ReadWriteSpinLock<br>
+</td>
+      <td style="vertical-align: top;" valign="top">Implements a spinlock that 
+        allows multiple readers but only a single writer. Otherwise it is similar 
+        to a basic spin lock with respect to purpose and applicability. <br>
+</td>
+      <td style="vertical-align: top;" valign="top">eathread_rwspinlock.h<br>
+</td>
+      <td style="vertical-align: top;" valign="top">EABase<br>
+        eathread.h/cpp<br>
+        eathread_sync.h <br>
+        eathread_atomic.h<br>
+      </td>
+    </tr><tr>
+      <td style="vertical-align: top;" valign="top">ThreadPool<br>
+</td>
+      <td style="vertical-align: top;" valign="top">Implements a "pool" of worker 
+        threads available for work. These are commonly used by server systems 
+        to spawn off client-server tasks.<br>
+</td>
+      <td style="vertical-align: top;" valign="top">eathread_pool.h/cpp<br>
+</td>
+      <td style="vertical-align: top;" valign="top">EABase<br>
+        eathread.h/cpp<br>
+        eathread_thread.h/cpp<br>
+        eathread_condition.h/cpp<br>
+        eathread_atomic.h<br>
+        eathread_list.h</td>
+    </tr><tr>
+      <td style="vertical-align: top;" valign="top">Sync<br>
+</td>
+      <td style="vertical-align: top;" valign="top">Implements memory synchronization 
+        primitives known as "fences" or "barriers" (not to be confused with thread 
+        barrier primitives). These primitives are useful on multiprocessing platforms 
+        for synchronizing the various processors' view of memory, which can become 
+        "unsynchronized" in the presence of per-processor caches. <br>
+</td>
+      <td style="vertical-align: top;" valign="top">eathread_sync.h<br>
+</td>
+      <td style="vertical-align: top;" valign="top">EABase</td>
+    </tr><tr>
+      <td style="vertical-align: top;" valign="top">shared_ptr_mt<br>
+shared_array_mt<br>
+      </td>
+      <td style="vertical-align: top;" valign="top">These are multithread-safe 
+        equivalents to regular smart pointers such as shared_ptr and shared_array. 
+        See the TL (Template Library) for implementations of the regular versions 
+        of these smart pointers.<br>
+      </td>
+      <td style="vertical-align: top;" valign="top">shared_ptr_mt.h<br>
+
+shared_array_mt.h</td>
+      <td style="vertical-align: top;" valign="top"> 
+        <p>eathread_atomic.h<br>
+          eathread_mutex.h <br>
+        </p>
+        </td>
+    </tr>
+
+
+
+  </tbody>
+</table>
+  <p>* May not be required, depending on your platform/configuration.<br>
+  </p>
+</div>
+
+
+<h3><span style="font-weight: bold;"></span>  Examples</h3>
+<p>We present some
+  very basic examples of how to use some of the EAThread modules. These
+  exemplify the simplest uses of these modules and don't go into more
+  advanced or complicated uses. There is more functionality in each of
+  the classes than shown; see the documentation or header files for more
+  information. For clarity, the examples assume that the code has
+  specified the <span style="font-family: monospace;">using EA::Thread;</span> namespace statement.<br>
+  <br>
+How to create a thread.</p>
+<blockquote>
+  <p class="style1">#include "eathread/eathread_thread.h"<br>
+    <br>
+  int ThreadFunction(void* pContext){<br>
+&nbsp;&nbsp; return 0;<br>
+  }<br>
+  <br>
+  Thread thread;<br>
+  thread.Begin(ThreadFunction);</p>
+</blockquote>
+<p>How to use thread-local storage.</p>
+<blockquote>
+  <p class="style1">#include "eathread/eathread_storage.h"<br>
+    <br>
+    ThreadLocalStorage tls;<br>
+    tls.SetValue("hello");<br>
+    const char* pString = (const char*)tls.GetValue();</p>
+</blockquote>
+<p>How to create and use an atomic integer.</p>
+<blockquote>
+  <p class="style1">#include "eathread/eathread_atomic.h"<br>
+    <br>
+    AtomicInteger i = 5;<br>
+    i += 7;<br>
+    --i;<br>
+    if(i.SetValueConditional(3, 6))<br>
+&nbsp;&nbsp; printf("i was 6 and now is 3.");</p>
+</blockquote>
+<p>How to create and use a mutex.</p>
+<blockquote>
+  <p class="style1">#include "eathread/eathread_mutex.h"<br>
+    <br>
+    Mutex mutex(NULL, true);<br>
+    mutex.Lock();<br>
+    mutex.Unlock();</p>
+</blockquote>
+<p>How to create and use a futex.</p>
+<blockquote>
+  <p class="style1">#include "eathread/eathread_futex.h"<br>
+      <br>
+    Futex futex;<br>
+    futex.Lock();<br>
+    futex.Unlock();</p>
+</blockquote>
+<p>How to create and use a semaphore.</p>
+<blockquote>
+  <p class="style1">#include "eathread/eathread_semaphore.h"<br>
+    <br>
+    Semaphore semaphore(NULL, true);<br>
+    semaphore.Post();<br>
+    semaphore.Wait();</p>
+</blockquote>
+<p>How to create and use a condition variable.</p>
+<blockquote>
+  <p class="style1">#include "eathread/eathread_condition.h"<br>
+    <br>
+    Condition condition(NULL, true);<br>
+    Mutex&nbsp;&nbsp;&nbsp;&nbsp; mutex(NULL, true);<br>
+    condition.Signal();<br>
+    condition.Wait(&amp;mutex);</p>
+</blockquote>
+<p>How to create and use a spin lock.</p>
+<blockquote>
+  <p class="style1">#include "eathread/eathread_spinlock.h"<br>
+    <br>
+    SpinLock spinLock;<br>
+    spinLock.Lock();<br>
+  spinLock.Unlock();</p>
+</blockquote>
+<p>How to create and use a shared_ptr_mt.</p>
+<blockquote>
+  <p><span class="style1">#include "eathread/shared_ptr_mt.h"<br>
+    <br>
+    shared_ptr_mt pObject(new SomeClass);<br>
+    pObject-&gt;DoSomething();</span></p>
+</blockquote>
+<hr style="width: 100%; height: 2px;">End of document<br>
+
+
+
+<br>
+
+
+<br>
+
+<br>
+
+<br>
+
+<br>
+
+<br>
+
+<br>
+
+<br>
+<br>
+<br>
+<br>
+</body>
+</html>

@@ -1,0 +1,159 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
+    <title>EACallstack</title>    
+	<link type="text/css" rel="stylesheet" href="UTFDoc.css">
+    <meta name="author" content="Paul Schlegel">
+    <style type="text/css">
+<!--
+.style1 {color: #0033CC}
+-->
+    </style>
+</head>
+<body bgcolor="#FFFFFF">
+<h1>EACallstack</h1>
+<h2>Introduction</h2>
+<p>The EACallstack package includes functionality to retrieve callstacks at runtime, convert callstacks to symbol names, locations, or source code, disassemble code, read PS3 (eventually other platform) crash dumps, read machine thread contexts, and related functionality. It supports code in DLLs (or other platform equivalents).</p>
+<p>EACallstack works on the following platforms:
+<ul>
+<li>PS3</li>
+<li>XBox 360</li>
+<li>Wii</li>
+<li>Windows / x86, x64</li>
+<li>Macintosh / x86, x64</li>
+<li>Linux / x86, x64</li>
+<li>Mobile / ARM</li>
+<li>PS2</li>
+</ul>
+</p>
+<p>The Callstack namespace is the primary namespace of the EACallstack package. 
+It defines the methods used to initialize and shut down EACallstack, and it 
+defines methods for the following functions that are fundamental to all 
+EACallstack operations:</p>
+<ul>
+	<li>To get the value of the current instruction pointer</li>
+	<li>To get the callstack, expressed as an array of instruction pointers, for 
+	any thread</li>
+</ul>
+<p>All of these functions return instruction pointers. In order to obtain 
+human-readable debugging information, an instruction pointer can be passed to 
+other classes within EACallstack, such as <a href="EAAddressRep.html">
+EAAddressRep</a> or <a href="EADasm.html">EADasm</a>.
+<a href="EAAddressRep.html">EAAddressRep</a> can be used for looking up symbol 
+information such as the function name, source file, line number, and source code 
+text associated with a program address. <a href="EADasm.html">EADasm</a> can be used 
+for disassembling machine code at a program address.</p>
+<p>By using the functions defined in the Callstack namespace in conjunction 
+with other classes defined in EACallstack, it is possible for an executable 
+running on a console platform to construct failure reports with a wide variety 
+of debugging information that can be immediately useful to a developer, without 
+the need for external symbol lookup tools or other translation steps.</p>
+<h2>Example usage </h2>
+<p>Here's example usage for how to use GetCallstack:</p>
+<pre class="code-example">void YourApp::Initialize()
+{
+    #ifdef EA_DEBUG // EACallstack is likely for debug-only configurations.
+<span class="style1">        Callstack::InitCallstack();
+<font color="#000000">    #endif</font></span>
+}
+
+void YourApp::OutputCallstack()
+{
+    void*  pCallstack[32];
+    size_t nCallstackDepth = <font color="#0033CC">GetCallstack(pCallstack, 32, NULL); </font>// NULL == use current thread context
+
+    for(size_t i = 0; i &lt; nCallstackDepth; ++i)
+    {
+        const void* const pCallstackAddress = pCallstack[i];
+
+        // Get the symbol information for pCallstackAddress via GetAddressRep here.
+        // See the documentation for <a href="EAAddressRep.html">EAAddressRep</a>.
+        //
+        // ... and/or ...
+        //
+        // Get the machine code disassembly for pCallstackAddress via EADasm here.
+        // See the documentation for <a href="EADasm.html">EADasm</a>.
+     }
+}
+
+void YourApp::Shutdown()
+{
+    #ifdef EA_DEBUG
+<span class="style1">        Callstack::ShutdownCallstack();
+<font color="#000000">    #endif</font></span>
+}</pre>
+<h2>Interface</h2>
+<p>Methods for the initialization and shutdown of the EACallstack package, 
+defined in the EACallstack.h header file:</p>
+<pre class="code-example"><span class="code-example-comment">/// InitCallstack
+///
+/// Allows the user to explicitly initialize the callstack mechanism.
+/// Only the first call to InitCallstack will have effect. Calls to 
+/// InitCallstack must be matched by calls to ShutdownCallstack.
+///
+</span>void InitCallstack();
+
+<span class="code-example-comment">/// ShutdownCallstack
+///
+/// Allows the user to explicitly shutdown the callstack mechanism.
+/// Calls to InitCallstack must be matched by calls to ShutdownCallstack.
+/// The last call to ShutdownCallstack will shutdown and free the callstack mechanism.
+///
+</span>void ShutdownCallstack();</pre>
+<p>The GetCallstack function:</p>
+<pre class="code-example"><span class="code-example-comment">/// GetCallstack
+///
+/// Gets the addresses of the calling instructions of a call stack.
+/// If the CallstackContext parameter is used, then that execution context is used;
+/// otherwise the current execution context is used.
+/// The return value is the number of entries written to the callstack array.
+/// The item at callstack[0] is always the address of the instruction calling the
+/// GetCallstack function. This is conceptually identical to placing a breakpoint in
+/// a debugger at the point where the GetCallstack function is called.
+/// The maxDepth parameter must be at least one.
+///
+</span>size_t GetCallstack(void* callstack[], size_t maxDepth, CallstackContext* pContext = NULL);</pre>
+<p>The GetCallstackContext function, for use when obtaining the callstack of a 
+particular thread:</p>
+<pre class="code-example"><span class="code-example-comment">/// GetCallstackContext
+///
+/// Gets the CallstackContext associated with the given thread.
+/// The thread must be in a non-running state.
+/// If the threadID is EAThread::kThreadIdInvalid, the current thread context is retrieved.
+/// The threadId parameter is the same type as an EAThread ThreadId. It is important to 
+/// note that an EAThread ThreadId under Microsoft platforms is a thread handle and not what 
+/// Microsoft calls a thread id. This is by design as Microsoft thread ids are second class
+/// citizens and likely wouldn't exist if it not were for quirks in the Windows API evolution.
+///
+</span>bool GetCallstackContext(CallstackContext&amp; context, intptr_t threadId = 0);</pre>
+<p>The EAGetInstructionPointer macro:</p>
+<pre class="code-example"><span class="code-example-comment">/// EAGetInstructionPointer
+///
+/// Returns the current instruction pointer (a.k.a. program counter).
+/// This function is implemented as a macro, it acts as if its declaration 
+/// were like so:
+/// void EAGetInstructionPointer(void*&amp; p);
+///
+/// For portability, this function should only be used as a standalone 
+/// statement on its own line.
+///
+/// Example usage:
+///     void* pInstruction;
+///     EAGetInstructionPointer(pInstruction);
+///
+</span>&lt;... implementation not shown ...&gt;</pre>
+<hr>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p></p>
+</body>
+</html>
+
+
+
