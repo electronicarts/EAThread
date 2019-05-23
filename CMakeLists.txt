@@ -7,17 +7,22 @@ project(EAThread CXX)
 #-------------------------------------------------------------------------------------------
 # Library definition
 #-------------------------------------------------------------------------------------------
-add_library(EAThread INTERFACE)
+file(GLOB EATHREAD_SOURCES "source/*.cpp")
+add_library(EAThread ${EATHREAD_SOURCES})
 
 #-------------------------------------------------------------------------------------------
-# Source files
+# Defines
 #-------------------------------------------------------------------------------------------
-file(GLOB EATHREAD_SOURCES "include/eathread/*.h")
+add_definitions(-D_CHAR16T)
+add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 
 #-------------------------------------------------------------------------------------------
-# Include directories
+# Export Include Directories
 #-------------------------------------------------------------------------------------------
-target_include_directories(EAThread INTERFACE include)
+target_include_directories(EAThread PUBLIC include)
 
-# Workaround to have header files show up in IDEs
-add_custom_target(EAThread_ide SOURCES ${EATHREAD_SOURCES})
+#-------------------------------------------------------------------------------------------
+# Package Dependencies 
+#-------------------------------------------------------------------------------------------
+target_link_libraries(EAThread EABase)
+
