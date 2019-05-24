@@ -17,9 +17,27 @@
 	#define EA_MEMORY_GCC_USE_FINALIZE
 #endif
 
-#include <MemoryMan/MemoryMan.inl>
-#include <MemoryMan/CoreAllocator.inl>
-#include <coreallocator/icoreallocator_interface.h>
+#ifndef EA_OPENSOURCE
+	#include <MemoryMan/MemoryMan.inl>
+	#include <MemoryMan/CoreAllocator.inl>
+	#include <coreallocator/icoreallocator_interface.h>
+#endif
+
+
+#ifdef EA_OPENSOURCE
+void* operator new[](size_t size, const char* /*pName*/, int /*flags*/,
+					 unsigned /*debugFlags*/, const char* /*file*/, int /*line*/)
+{
+	return operator new[](size);
+}
+
+void* operator new[](size_t size, size_t /*alignment*/, size_t /*alignmentOffset*/, const char* /*pName*/,
+					 int /*flags*/, unsigned /*debugFlags*/, const char* /*file*/, int /*line*/)
+{
+	return operator new[](size);
+}
+#endif
+
 
 #ifdef EA_DLL
 	#include <MemoryMan/MemoryManDLL.h>
@@ -152,7 +170,9 @@ int EAMain(int argc, char** argv)
 	#endif
 
 	//Set EAThread to use the Default Allocator to keep track of our memory usage
+#ifndef EA_OPENSOURCE
 	EA::Thread::SetAllocator(EA::Allocator::ICoreAllocator::GetDefaultAllocator());
+#endif
 	EA::Thread::InitCallstack();
 
 	// Print ThreadId for this primary thread.

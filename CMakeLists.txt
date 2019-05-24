@@ -5,10 +5,19 @@ cmake_minimum_required(VERSION 3.1)
 project(EAThread CXX)
 
 #-------------------------------------------------------------------------------------------
+# Options
+#-------------------------------------------------------------------------------------------
+option(EATHREAD_BUILD_TESTS "Enable generation of build files for tests" OFF)
+
+#-------------------------------------------------------------------------------------------
 # Library definition
 #-------------------------------------------------------------------------------------------
 file(GLOB EATHREAD_SOURCES "source/*.cpp")
 add_library(EAThread ${EATHREAD_SOURCES})
+
+if(EATHREAD_BUILD_TESTS)
+    add_subdirectory(test)
+endif()
 
 #-------------------------------------------------------------------------------------------
 # Defines
