@@ -166,7 +166,7 @@
 		return mSemaphoreData.mnCount.GetValue();
 	}
 
-#endif // EA_PLATFORM_KETTLE
+#endif // EA_PLATFORM_SONY
 
 
 

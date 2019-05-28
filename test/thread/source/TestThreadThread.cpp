@@ -93,9 +93,8 @@ static intptr_t TestFunction7(void*)
 
 static intptr_t TestFunction8(void*)
 {
-	ThreadSleep(2000);
-
-	++sShouldGo;
+	while(sShouldGo == 0)
+		ThreadSleep(10);
 
 	return 0;
 }
@@ -665,7 +664,7 @@ int TestThreadDisablePriorityBoost()
 {
 	int nErrorCount = 0;
 
-#if defined(EA_PLATFORM_WINDOWS) || defined(EA_PLATFORM_CAPILANO)
+#if defined(EA_PLATFORM_WINDOWS) || defined(EA_PLATFORM_XBOXONE)
 	{
 		Thread thread;
 		ThreadParameters params;
@@ -831,7 +830,7 @@ int TestThreadThread()
 
 		EATEST_VERIFY_MSG(sysThreadId != kSysThreadIdInvalid, "GetSysThreadId failure.\n");
 
-		#if (defined(EA_PLATFORM_MICROSOFT) || defined(EA_PLATFORM_UNIX) || defined(EA_PLATFORM_KETTLE)) && !EA_USE_CPP11_CONCURRENCY
+		#if (defined(EA_PLATFORM_MICROSOFT) || defined(EA_PLATFORM_UNIX) || defined(EA_PLATFORM_PS4)) && !EA_USE_CPP11_CONCURRENCY
 			const void*    pStackBase = GetThreadStackBase();
 			const void*    pStackTop  = &pStackBase;
 			const intptr_t stackSize  = ((char*)pStackBase - (char*)pStackTop);
@@ -843,7 +842,7 @@ int TestThreadThread()
 
 		// We disable this test for now on Kettle because although we have 7 cores available 
 		// there is no guaranty the their ID are 0..6 and the system takes core ID 7
-		#if !defined(EA_PLATFORM_KETTLE)
+		#if !defined(EA_PLATFORM_PS4)
 
 			int processorCount = GetProcessorCount();
 			int processor      = GetThreadProcessor();
@@ -1187,23 +1186,11 @@ int TestThreadThread()
 			ThreadId threadId = thread.Begin(TestFunction8);
 			EATEST_VERIFY_MSG(threadId != kThreadIdInvalid, "Thread failure: thread.Begin(TestFunction8) failed.\n");
 
-			// Give the thread a nominal second to get going and ensure we get a decent overlap of a second.
-			ThreadSleep(1000);
-
 			// Now we exit our scope while our thread in theory still has a second before it completes
-		}
-		
-		// We either get here before the thread function completes in which case sShouldGo is 0 or
-		// we get here after it completes which would be incorrect and would give us a sShouldGo of 1
-		const bool threadScopeSemanticsVerified = sShouldGo == 0;
+		} // NOTE(rparolin): If your test hangs here, its most likely due to a semantic change in the thread object that is waiting for threads to complete.
 
-		// Rather than try to wait on threadid in a cross platform way we simply sleep for 2 seconds which 
-		// we know should be sufficient for the thread to complete. We can make this part of the test
-		// as shouldgo should be 1 when the thread has completed.
-		ThreadSleep(2000);
-
-		EATEST_VERIFY_MSG(threadScopeSemanticsVerified, "Thread failure: Thread should not have ended before Thread object dtor completed. Behaviour is inconsistent with intent.\n");
-		EATEST_VERIFY_MSG(sShouldGo == 1, "Thread failure: Thread set to run for 2 seconds at least 3 seconds ago. Should have ended by now.\n");
+		// Signal to the thread it is allowed to complete.
+		sShouldGo = 1;
 	}
 
 

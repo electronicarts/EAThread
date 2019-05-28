@@ -69,7 +69,7 @@
 		#define EAReadBarrier()      _ReadBarrier()
 		#define EAWriteBarrier()     _WriteBarrier()
 		#define EAReadWriteBarrier() _ReadWriteBarrier()
-	#elif defined(EA_PLATFORM_KETTLE)
+	#elif defined(EA_PLATFORM_PS4)
 		#define EAReadBarrier()      __asm__ __volatile__ ("lfence" ::: "memory");
 		#define EAWriteBarrier()     __asm__ __volatile__ ("sfence" ::: "memory");
 		#define EAReadWriteBarrier() __asm__ __volatile__ ("mfence" ::: "memory");

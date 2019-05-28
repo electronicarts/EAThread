@@ -110,7 +110,7 @@ bool IsSuperUser()
 int TestThreadGetThreadTimeMin()
 {
 	int nErrorCount(0);
-#if defined(EA_PLATFORM_MICROSOFT) || defined(EA_PLATFORM_KETTLE)
+#if defined(EA_PLATFORM_MICROSOFT) || defined(EA_PLATFORM_PS4)
 	EATEST_VERIFY_MSG(EA::Thread::GetThreadTime() >= EATHREAD_MIN_ABSOLUTE_TIME, "Reported GetThreadTime absolute time is less than EATHREAD_MIN_ABSOLUTE_TIME. You are going to have a bad time.");
 #endif
 	return nErrorCount;

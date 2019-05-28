@@ -43,7 +43,6 @@ EA_DISABLE_VC_WARNING(6312 6322)
 
 
 	#ifdef _MSC_VER
-		#pragma warning(disable: 4996) // This function or variable may be unsafe / deprecated.
 		#ifndef EATHREAD_INIT_SEG_DEFINED
 			#define EATHREAD_INIT_SEG_DEFINED 
 		#endif
@@ -341,7 +340,7 @@ EA_DISABLE_VC_WARNING(6312 6322)
 			mThreadData.mpData->Release();
 	}
 
-  #if defined(EA_PLATFORM_CAPILANO)
+  #if defined(EA_PLATFORM_XBOXONE)
 	static DWORD WINAPI RunnableFunctionInternal(void* pContext)
   #else
 	static unsigned int __stdcall RunnableFunctionInternal(void* pContext)
@@ -442,7 +441,7 @@ EA_DISABLE_VC_WARNING(6312 6322)
 
 		const unsigned nStackSize = pTP ? (unsigned)pTP->mnStackSize : 0;
 
-		#if defined(EA_PLATFORM_CAPILANO)
+		#if defined(EA_PLATFORM_XBOXONE)
 			// Capilano no longer supports _beginthreadex. Using CreateThread instead may cause issues when using the MS CRT 
 			// according to MSDN (memory leaks or possibly crashes) as it does not initialize the CRT. This a reasonable
 			// workaround while we wait for clarification from MS on what the recommended threading APIs are for Capilano.
@@ -462,7 +461,7 @@ EA_DISABLE_VC_WARNING(6312 6322)
 			if(pTP && (pTP->mnPriority != kThreadPriorityDefault))
 				SetPriority(pTP->mnPriority);
 
-			#if defined(EA_PLATFORM_WINDOWS) || defined(EA_PLATFORM_CAPILANO)
+			#if defined(EA_PLATFORM_WINDOWS) || defined(EA_PLATFORM_XBOXONE)
 			if (pTP)
 			{
 				auto result = SetThreadPriorityBoost(pData->mhThread, pTP->mbDisablePriorityBoost);
@@ -492,7 +491,7 @@ EA_DISABLE_VC_WARNING(6312 6322)
 		return (ThreadId)kThreadIdInvalid;
 	}
 
-  #if defined(EA_PLATFORM_CAPILANO)
+  #if defined(EA_PLATFORM_XBOXONE)
 	static DWORD WINAPI RunnableObjectInternal(void* pContext)
   #else
 	static unsigned int __stdcall RunnableObjectInternal(void* pContext)
@@ -553,7 +552,7 @@ EA_DISABLE_VC_WARNING(6312 6322)
 		pData->mnThreadAffinityMask = pTP ? pTP->mnAffinityMask : kThreadAffinityMaskAny;
 		const unsigned nStackSize     = pTP ? (unsigned)pTP->mnStackSize : 0;
 
-		#if defined(EA_PLATFORM_CAPILANO)
+		#if defined(EA_PLATFORM_XBOXONE)
 			// Capilano no longer supports _beginthreadex. Using CreateThread instead may cause issues when using the MS CRT 
 			// according to MSDN (memory leaks or possibly crashes) as it does not initialize the CRT. This a reasonable
 			// workaround while we wait for clarification from MS on what the recommended threading APIs are for Capilano.
@@ -574,7 +573,7 @@ EA_DISABLE_VC_WARNING(6312 6322)
 			if(pTP && (pTP->mnPriority != kThreadPriorityDefault))
 				SetPriority(pTP->mnPriority);
 
-			#if defined(EA_PLATFORM_WINDOWS) || defined(EA_PLATFORM_CAPILANO)
+			#if defined(EA_PLATFORM_WINDOWS) || defined(EA_PLATFORM_XBOXONE)
 			if (pTP)
 			{
 				auto result = SetThreadPriorityBoost(pData->mhThread, pTP->mbDisablePriorityBoost);
@@ -733,7 +732,7 @@ EA_DISABLE_VC_WARNING(6312 6322)
 
 			// Windows process running in NORMAL_PRIORITY_CLASS is picky about the priority passed in.
 			// So we need to set the priority to the next priority supported
-			#if defined(EA_PLATFORM_WINDOWS) || defined(EA_PLATFORM_CAPILANO)
+			#if defined(EA_PLATFORM_WINDOWS) || defined(EA_PLATFORM_XBOXONE)
 				while(!result)
 				{
 					if(nNewPriority >= THREAD_PRIORITY_TIME_CRITICAL) 
@@ -758,7 +757,7 @@ EA_DISABLE_VC_WARNING(6312 6322)
 	{
 		if(mThreadData.mpData)
 		{
-			#if defined(EA_PLATFORM_CAPILANO)
+			#if defined(EA_PLATFORM_XBOXONE)
 
 				static int nProcessorCount = GetProcessorCount();
 				if(nProcessor >= nProcessorCount)

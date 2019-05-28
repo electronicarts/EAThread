@@ -16,12 +16,6 @@
 #endif
 
 
-#ifdef _MSC_VER
-	#pragma warning(disable: 4996) // This function or variable may be unsafe / deprecated.
-#endif
-
-
-
 #if defined(EA_PLATFORM_MICROSOFT) && !EA_POSIX_THREADS_AVAILABLE
 	#if defined(EA_PLATFORM_WINDOWS)
 		extern "C" WINBASEAPI BOOL WINAPI TryEnterCriticalSection(_Inout_ LPCRITICAL_SECTION lpCriticalSection);

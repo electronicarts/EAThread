@@ -256,7 +256,7 @@ EA_NO_INLINE EACALLSTACK_TEST_FUNCTION_LINKAGE  int TestRemoteThreadContextVsCal
 	auto threadId = remoteThread.mThread.GetId();
 
 	{
-#if defined(EA_PLATFORM_WINDOWS) || defined(EA_PLATFORM_CAPILANO)
+#if defined(EA_PLATFORM_WINDOWS) || defined(EA_PLATFORM_XBOXONE)
 		// suspend the target thread to make sure we get a coherent callstack
 		bool wasSuspended = (::SuspendThread(threadId) != ((DWORD)-1)); // fail is (DWORD)-1
 #endif
@@ -267,7 +267,7 @@ EA_NO_INLINE EACALLSTACK_TEST_FUNCTION_LINKAGE  int TestRemoteThreadContextVsCal
 			EA::Thread::GetCallstack(addressContextArray, EAArrayCount(addressContextArray), &callstackContext);
 		}
 
-#if defined(EA_PLATFORM_WINDOWS) || defined(EA_PLATFORM_CAPILANO)
+#if defined(EA_PLATFORM_WINDOWS) || defined(EA_PLATFORM_XBOXONE)
 		// resume the target thread as needed
 		if (wasSuspended)
 		{
@@ -305,7 +305,7 @@ int TestThreadCallstack()
 			EA::Thread::ShutdownCallstack();
 		}
 
-		#if defined(EA_PLATFORM_WIN64) || defined(EA_PLATFORM_CAPILANO) ||  defined(EA_PLATFORM_KETTLE)
+		#if defined(EA_PLATFORM_WIN64) || defined(EA_PLATFORM_XBOXONE) ||  defined(EA_PLATFORM_PS4)
 		// This test will spawn a thread which will grab its own context and provide it to the main thread 
 		// to use when generating a callstack. We use semaphores to control the created thread to ensure 
 		// the thread is alive while we call GetCallstack() inside of VerifyCallstack()
@@ -344,7 +344,7 @@ int TestThreadCallstack()
 			EA::Thread::InitCallstack();
 
 			const int numErrorInRemoteTest = TestRemoteThreadContextVsCallstack();
-			#if defined(EA_PLATFORM_KETTLE) // We know that kettle cannot do remote callstacks. This is just to check that it does not crash when attempting to do a remote callstack
+			#if defined(EA_PLATFORM_PS4) // We know that kettle cannot do remote callstacks. This is just to check that it does not crash when attempting to do a remote callstack
 				EATEST_VERIFY(numErrorInRemoteTest != 0);
 			#else
 				nErrorCount += numErrorInRemoteTest;

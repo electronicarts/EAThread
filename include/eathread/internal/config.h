@@ -109,12 +109,18 @@ EA_RESTORE_VC_WARNING()
 
 
 ///////////////////////////////////////////////////////////////////////////////
-// EA_OPENKODE_THREADS_AVAILABLE
+// EA_POSIX_THREADS_AVAILABLE
 //
 // Defined as 0 or 1
 //
-#ifndef EA_OPENKODE_THREADS_AVAILABLE
-	#define EA_OPENKODE_THREADS_AVAILABLE 0  // used historically on the Marmalade (Airplay) platform.
+#ifndef EA_POSIX_THREADS_AVAILABLE
+	#if defined(__unix__) || defined(__linux__) || defined(__APPLE__) 
+		#define EA_POSIX_THREADS_AVAILABLE 1
+	#elif defined(EA_PLATFORM_SONY)
+	   #define EA_POSIX_THREADS_AVAILABLE 0  // POSIX threading API is present but use is discouraged by Sony.  They want shipping code to use their scePthreads* API.
+	#else
+		#define EA_POSIX_THREADS_AVAILABLE 0
+	#endif
 #endif
 
 
@@ -135,14 +141,12 @@ EA_RESTORE_VC_WARNING()
 
 
 #if EAT_ASSERT_ENABLED
-	#define EAT_STRINGIFY_HELPER(x) #x
-	#define EAT_STRINGIFY(x) EAT_STRINGIFY_HELPER(x)
 	#define EAT_ASSERT(expression) \
 		EA_DISABLE_VC_WARNING(4127) \
 		do { \
 			EA_ANALYSIS_ASSUME(expression); \
 			if (!(expression) ) \
-				EA::Thread::AssertionFailure(__FILE__ "(" EAT_STRINGIFY(__LINE__) "): " #expression); \
+				EA::Thread::AssertionFailure(__FILE__ "(" EA_STRINGIFY(__LINE__) "): " #expression); \
 		} while(0) \
 		EA_RESTORE_VC_WARNING()
 #else
@@ -528,7 +532,7 @@ EA_RESTORE_VC_WARNING()
 // If true then the platform supports a user specified thread affinity mask.
 //
 #ifndef EATHREAD_THREAD_AFFINITY_MASK_SUPPORTED
-	#if   defined(EA_PLATFORM_CAPILANO)
+	#if   defined(EA_PLATFORM_XBOXONE)
 		#define EATHREAD_THREAD_AFFINITY_MASK_SUPPORTED 1
 	#elif defined(EA_PLATFORM_SONY)
 		#define EATHREAD_THREAD_AFFINITY_MASK_SUPPORTED 1

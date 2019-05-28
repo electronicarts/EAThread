@@ -21,12 +21,6 @@ EA_RESTORE_VC_WARNING()
 	#include <eathread/eathread_condition.h>
 	#include <string.h>
 
-
-	#ifdef _MSC_VER
-		#pragma warning(disable: 4996) // This function or variable may be unsafe / deprecated.
-	#endif
-
-
 	EAConditionData::EAConditionData()
 	   : mnWaitersBlocked(0), mnWaitersToUnblock(0), mnWaitersDone(0),
 		 mSemaphoreBlockQueue(NULL, false), // We will be initializing these ourselves specifically below.

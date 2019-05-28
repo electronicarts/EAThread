@@ -59,8 +59,6 @@
 
 #if !EA_THREADS_AVAILABLE
 	// Do nothing.
-#elif defined(EA_PLATFORM_OSX)
-	#include <eathread/powerpc/eathread_sync_powerpc.h>
 #elif defined(EA_PROCESSOR_X86)
 	#include <eathread/x86/eathread_sync_x86.h>
 #elif defined(EA_PROCESSOR_X86_64)

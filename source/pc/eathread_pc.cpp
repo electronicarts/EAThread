@@ -418,7 +418,7 @@ EATHREADLIB_API bool EA::Thread::SetThreadPriority(int nPriority)
 
 	// Windows process running in NORMAL_PRIORITY_CLASS is picky about the priority passed in.
 	// So we need to set the priority to the next priority supported
-	#if defined(EA_PLATFORM_WINDOWS) || defined(EA_PLATFORM_CAPILANO)
+	#if defined(EA_PLATFORM_WINDOWS) || defined(EA_PLATFORM_XBOXONE)
 		HANDLE thread = GetCurrentThread();
 
 		while(!result)
@@ -440,7 +440,7 @@ EATHREADLIB_API bool EA::Thread::SetThreadPriority(int nPriority)
 
 EATHREADLIB_API void EA::Thread::SetThreadProcessor(int nProcessor)
 {
-	#if   defined(EA_PLATFORM_CAPILANO)
+	#if   defined(EA_PLATFORM_XBOXONE)
 
 		DWORD mask = 0xFF; //Default to all
 		if (nProcessor >= 0)
@@ -587,7 +587,7 @@ EATHREADLIB_API void EA::Thread::SetThreadAffinityMask(const EA::Thread::ThreadI
 	}
 
 #if EATHREAD_THREAD_AFFINITY_MASK_SUPPORTED
-	#if defined(EA_PLATFORM_CAPILANO)
+	#if defined(EA_PLATFORM_XBOXONE)
 		DWORD_PTR nProcessorCountMask = 0x7F;  // default to all 7 available cores.
 	#else
 		DWORD_PTR nProcessorCountMask = (DWORD_PTR)1 << GetProcessorCount(); 
@@ -629,7 +629,7 @@ namespace Internal {
 
 		bool result = true;
 
-	#if (defined(EA_PLATFORM_CAPILANO) && EA_CAPILANO_DBG_ENABLED == 1)
+	#if (defined(EA_PLATFORM_XBOXONE) && EA_CAPILANO_DBG_ENABLED == 1)
 		wchar_t wName[EATHREAD_NAME_SIZE];
 		mbstowcs(wName, pName, EATHREAD_NAME_SIZE);
 		result = (::SetThreadName(threadId, wName) == TRUE); // requires toolhelpx.lib
@@ -693,7 +693,7 @@ namespace Internal {
 		strncpy(pTDD->mName, pName, EATHREAD_NAME_SIZE);
 		pTDD->mName[EATHREAD_NAME_SIZE - 1] = 0;
 
-	#if defined(EA_PLATFORM_WINDOWS) && defined(_MSC_VER) || (defined(EA_PLATFORM_CAPILANO))
+	#if defined(EA_PLATFORM_WINDOWS) && defined(_MSC_VER) || (defined(EA_PLATFORM_XBOXONE))
 		if(pTDD->mName[0] && (pTDD->mhThread != EA::Thread::kThreadIdInvalid))
 		{
 			#if EATHREAD_NAMING == EATHREAD_NAMING_DISABLED
@@ -737,7 +737,7 @@ EATHREADLIB_API const char* EA::Thread::GetThreadName(const EA::Thread::ThreadId
 
 EATHREADLIB_API int EA::Thread::GetProcessorCount()
 {
-	#if defined(EA_PLATFORM_CAPILANO)
+	#if defined(EA_PLATFORM_XBOXONE)
 		// Capilano has 7-ish physical CPUs available to titles.  We can access 50 - 90% of the 7th Core.  
 		// Check platform documentation for details.
 	    DWORD_PTR ProcessAffinityMask;
@@ -819,12 +819,12 @@ void EA::Thread::ThreadEnd(intptr_t threadReturnValue)
 
 	EA::Thread::SetCurrentThreadHandle(kThreadIdInvalid, true); // We use 'true' here just to be safe, as we don't know who is calling this function.
 
-	#if defined(EA_PLATFORM_CAPILANO)
+	#if defined(EA_PLATFORM_XBOXONE)
 		// _endthreadex is not supported on Capilano because it's not compatible with C++/CX and /ZW.  Use of ExitThread could result in memory leaks
 		// as ExitThread does not clean up memory allocated by the C runtime library.
 		// https://forums.xboxlive.com/AnswerPage.aspx?qid=47c1607c-bb18-4bc4-a79a-a40c59444ff3&tgt=1        
 		ExitThread(static_cast<DWORD>(threadReturnValue));
-	#elif defined(EA_PLATFORM_MICROSOFT) && defined(EA_PLATFORM_CONSOLE) && !defined(EA_PLATFORM_CAPILANO)
+	#elif defined(EA_PLATFORM_MICROSOFT) && defined(EA_PLATFORM_CONSOLE) && !defined(EA_PLATFORM_XBOXONE)
 		EAT_FAIL_MSG("EA::Thread::ThreadEnd: Not supported by this platform.");
 	#else
 		_endthreadex((unsigned int)threadReturnValue);

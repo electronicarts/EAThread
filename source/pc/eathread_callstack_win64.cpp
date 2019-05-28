@@ -299,7 +299,7 @@ EATHREADLIB_API size_t GetCallstack(void* pReturnAddressArray[], size_t nReturnA
 			context.ContextFlags = CONTEXT_ALL; // Actually we should need only CONTEXT_INTEGER, so let's test that next chance we get.
 			RtlCaptureContext(&context);
 
-		#elif defined(EA_PLATFORM_CAPILANO) // This probably isn't limited to just this platform, but until we can test any other platforms we'll leave it at just this.
+		#elif defined(EA_PLATFORM_XBOXONE) // This probably isn't limited to just this platform, but until we can test any other platforms we'll leave it at just this.
 			return RtlCaptureStackBackTrace(1, (ULONG)nReturnAddressArrayCapacity, pReturnAddressArray, NULL);
 
 		#else

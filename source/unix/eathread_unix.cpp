@@ -4,6 +4,7 @@
 
 
 #include <EABase/eabase.h>
+#include <EABase/eahave.h>
 #include <eathread/eathread.h>
 #include <eathread/eathread_thread.h>
 
