@@ -62,9 +62,9 @@ set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
 if((NOT APPLE) AND (NOT WIN32))
-    target_link_libraries(EAStdCTest ${EASTLTest_Libraries} Threads::Threads rt)
+    target_link_libraries(EAThreadTest ${EASTLTest_Libraries} Threads::Threads rt)
 else()
-    target_link_libraries(EAStdCTest ${EASTLTest_Libraries} Threads::Threads)
+    target_link_libraries(EAThreadTest ${EASTLTest_Libraries} Threads::Threads)
 endif()
 
 #-------------------------------------------------------------------------------------------
