@@ -65,11 +65,13 @@
 	#endif
 
 	#if defined(EA_PROCESSOR_X86)
-		#define _InterlockedExchange64		_InterlockedExchange64_INLINE
-		#define _InterlockedExchangeAdd64	_InterlockedExchangeAdd64_INLINE
-		#define _InterlockedAnd64			_InterlockedAnd64_INLINE
-		#define _InterlockedOr64			_InterlockedOr64_INLINE
-		#define _InterlockedXor64			_InterlockedXor64_INLINE
+        	#include <Windows.h>
+
+		#define _InterlockedExchange64		_InlineInterlockedExchange64
+		#define _InterlockedExchangeAdd64	_InlineInterlockedExchangeAdd64
+		#define _InterlockedAnd64			_InlineInterlockedAnd64
+		#define _InterlockedOr64			_InlineInterlockedOr64
+		#define _InterlockedXor64			_InlineInterlockedXor64
 	#endif
 #endif // EA_PLATFORM_MICROSOFT
 
