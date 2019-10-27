@@ -10,12 +10,16 @@
 	#include <pthread.h>
 #endif
 
+#if defined(EA_PLATFORM_MICROSOFT)
+	#include <Windows.h>
+#endif
+
 namespace EA
 {
 namespace Thread
 {
 
-#if defined(EA_PLATFORM_UNIX) || defined(EA_PLATFORM_APPLE) || defined(EA_PLATFORM_SONY)
+#if defined(EA_PLATFORM_UNIX) || defined(EA_PLATFORM_APPLE) || defined(EA_PLATFORM_SONY) || defined(EA_PLATFORM_MINGW)
 	// With some implementations of pthread, the stack base is returned by pthread as NULL if it's the main thread,
 	// or possibly if it's a thread you created but didn't call pthread_attr_setstack manually to provide your 
 	// own stack. It's impossible for us to tell here whether will be such a NULL return value, so we just do what
@@ -79,6 +83,25 @@ namespace Thread
 				*pLimit = pLimitTemp;
 
 			return returnValue;
+		}
+	#elif defined(EA_PLATFORM_MINGW)
+		bool GetPthreadStackInfo(void** pBase, void** pLimit)
+		{
+			// Do the same as Windows x64 here, but also use the same strategy for 32 bit builds.
+
+			// NtCurrentTeb is defined in <WinNT.h> as an inline call to __readgsqword
+		#if defined(EA_PROCESSOR_X86)
+			NT_TIB *pTIB = reinterpret_cast<NT_TIB*>(NtCurrentTeb());
+		#else // defined(EA_PROCESSOR_X64)
+			NT_TIB64* pTIB = reinterpret_cast<NT_TIB64*>(NtCurrentTeb());
+		#endif
+
+			if(pBase)
+				*pBase = reinterpret_cast<void*>(pTIB->StackBase);
+			if(pLimit)
+				*pLimit = reinterpret_cast<void*>(pTIB->StackLimit);
+
+			return true;
 		}
 	#else
 		bool GetPthreadStackInfo(void** pBase, void** pLimit)

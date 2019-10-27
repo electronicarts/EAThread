@@ -114,6 +114,18 @@
 					#define _Must_inspect_result_
 				#endif
 
+				#ifndef _Out_
+					#define _Out_
+				#endif
+
+				#ifndef _Inout_
+					#define _Inout_
+				#endif
+
+				#ifndef _In_
+					#define _In_
+				#endif
+
 				struct _RTL_CRITICAL_SECTION;
 				__declspec(dllimport) _Must_inspect_result_ int           __stdcall InitializeCriticalSectionAndSpinCount(_Out_ _RTL_CRITICAL_SECTION* pCriticalSection, _In_ unsigned long dwSpinCount);
 				__declspec(dllimport) void          __stdcall InitializeCriticalSection(_Out_ _RTL_CRITICAL_SECTION* pCriticalSection);

@@ -257,7 +257,7 @@ EA_NO_INLINE EACALLSTACK_TEST_FUNCTION_LINKAGE  int TestRemoteThreadContextVsCal
 	auto threadId = remoteThread.mThread.GetId();
 
 	{
-#if defined(EA_PLATFORM_WINDOWS) || defined(EA_PLATFORM_XBOXONE)
+#if (defined(EA_PLATFORM_WINDOWS) || defined(EA_PLATFORM_XBOXONE)) && !defined(EA_PLATFORM_MINGW)
 		// suspend the target thread to make sure we get a coherent callstack
 		bool wasSuspended = (::SuspendThread(threadId) != ((DWORD)-1)); // fail is (DWORD)-1
 #endif
@@ -268,7 +268,7 @@ EA_NO_INLINE EACALLSTACK_TEST_FUNCTION_LINKAGE  int TestRemoteThreadContextVsCal
 			EA::Thread::GetCallstack(addressContextArray, EAArrayCount(addressContextArray), &callstackContext);
 		}
 
-#if defined(EA_PLATFORM_WINDOWS) || defined(EA_PLATFORM_XBOXONE)
+#if (defined(EA_PLATFORM_WINDOWS) || defined(EA_PLATFORM_XBOXONE)) && !defined(EA_PLATFORM_MINGW)
 		// resume the target thread as needed
 		if (wasSuspended)
 		{

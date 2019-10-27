@@ -58,7 +58,7 @@ namespace
         using namespace EA::Thread;
 
         #if defined(EA_PLATFORM_WINDOWS)
-            param.sched_priority = THREAD_PRIORITY_NORMAL + (nPriority - kThreadPriorityDefault);
+            param.sched_priority = THREAD_PRIORITY_NORMAL + (eathreadPriority - kThreadPriorityDefault);
 
         #elif defined(EA_PLATFORM_LINUX) && !defined(EA_PLATFORM_CYGWIN)
             // We are assuming Kernel 2.6 and later behaviour, but perhaps we should dynamically detect.
@@ -177,7 +177,7 @@ namespace
             {
                 EAT_ASSERT(pTP->mnStackSize != 0);
 
-                #if !defined(EA_PLATFORM_CYGWIN) // Some implementations of pthreads does not support pthread_attr_setstack.
+                #if !defined(EA_PLATFORM_CYGWIN) && !defined(EA_PLATFORM_MINGW) // Some implementations of pthreads does not support pthread_attr_setstack.
                     #if defined(PTHREAD_STACK_MIN)
                         EAT_ASSERT((pTP->mnStackSize >= PTHREAD_STACK_MIN));
                     #endif
@@ -235,6 +235,26 @@ namespace
                     pthread_setaffinity_np(pTDD->mThreadId, sizeof(cpus), &cpus);
                     // We don't assert on the pthread_setaffinity_np return value, as that could be very noisy for some users.   
                 #endif
+            #elif defined(EA_PLATFORM_WINDOWS)
+               int nProcessorCount = EA::Thread::GetProcessorCount();
+
+                if(pTDD->mStartupProcessor < 0)
+                    pTDD->mStartupProcessor = MAXIMUM_PROCESSORS;
+                else
+                {
+                    if(pTDD->mStartupProcessor >= nProcessorCount)
+                        pTDD->mStartupProcessor %= nProcessorCount;
+                }
+
+                void *winThreadId = pthread_gethandle(pTDD->mThreadId);
+                EAT_ASSERT(winThreadId);
+
+                // SetThreadIdealProcessor differs from SetThreadAffinityMask in that SetThreadIdealProcessor is not
+                // a strict assignment, and it allows the OS to move the thread if the ideal processor is busy.
+                // SetThreadAffinityMask is a more rigid assignment, but it can result in slower performance and
+                // possibly hangs due to processor contention between threads. For Windows we use SetIdealThreadProcessor
+                // in the name of safety and likely better overall performance.
+                ::SetThreadIdealProcessor(winThreadId, pTDD->mStartupProcessor);
             #endif
         }
         // Else the thread hasn't started yet, or has already exited. Let the thread set its own 
@@ -543,6 +563,16 @@ static void* RunnableFunctionInternal(void* pContext)
             SetPlatformThreadAffinity(pTDD);
         else if(pTDD->mStartupProcessor == EA::Thread::kProcessorAny)
             EA::Thread::SetThreadAffinityMask(pTDD->mnThreadAffinityMask);
+
+    #elif defined(EA_PLATFORM_MINGW)
+        pTDD->mThreadPid = getpid();
+
+        if(pTDD->mStartupProcessor != EA::Thread::kProcessorDefault
+           && pTDD->mStartupProcessor != EA::Thread::kProcessorAny)
+            SetPlatformThreadAffinity(pTDD);
+        else if(pTDD->mStartupProcessor == EA::Thread::kProcessorAny)
+            EA::Thread::SetThreadAffinityMask(pTDD->mnThreadAffinityMask);
+
     #elif !defined(EA_PLATFORM_CONSOLE) && !defined(EA_PLATFORM_MOBILE)
         pTDD->mThreadPid = getpid(); // We can't set a thread affinity with a process id. 
     #else
@@ -603,6 +633,15 @@ static void* RunnableObjectInternal(void* pContext)
         pTDD->mThreadPid = (pid_t)syscall(__NR_gettid); // It's safest to just make the syscall directly.
 
         if(pTDD->mStartupProcessor != EA::Thread::kProcessorDefault && pTDD->mStartupProcessor != EA::Thread::kProcessorAny)
+            SetPlatformThreadAffinity(pTDD);
+        else if(pTDD->mStartupProcessor == EA::Thread::kProcessorAny)
+            EA::Thread::SetThreadAffinityMask(pTDD->mnThreadAffinityMask);
+
+    #elif defined(EA_PLATFORM_MINGW)
+        pTDD->mThreadPid = getpid();
+
+        if(pTDD->mStartupProcessor != EA::Thread::kProcessorDefault
+           && pTDD->mStartupProcessor != EA::Thread::kProcessorAny)
             SetPlatformThreadAffinity(pTDD);
         else if(pTDD->mStartupProcessor == EA::Thread::kProcessorAny)
             EA::Thread::SetThreadAffinityMask(pTDD->mnThreadAffinityMask);
@@ -970,34 +1009,7 @@ bool EA::Thread::Thread::SetPriority(int nPriority)
 // To consider: Make it so we return a value.
 void EA::Thread::Thread::SetProcessor(int nProcessor)
 {
-    #if defined(EA_PLATFORM_WINDOWS)
-        if(mThreadData.mpData)
-        {
-            static AtomicInt32 nProcessorCount = 0;
-
-            if(nProcessorCount == 0)
-            {
-                SYSTEM_INFO systemInfo;
-                memset(&systemInfo, 0, sizeof(systemInfo));
-                GetSystemInfo(&systemInfo);
-                nProcessorCount = (int)systemInfo.dwNumberOfProcessors;
-            }
-
-            DWORD dwThreadAffinityMask;
-
-            if(nProcessor < 0)
-                dwThreadAffinityMask = 0xffffffff;
-            else
-            {
-                if(nProcessor >= nProcessorCount)
-                    nProcessor %= nProcessorCount; 
-
-                dwThreadAffinityMask = 1 << nProcessor;
-            }
-
-            SetThreadAffinityMask(mThreadData.mpData->mThreadId, dwThreadAffinityMask);
-        }
-    #elif defined(EA_PLATFORM_LINUX) 
+    #if defined(EA_PLATFORM_LINUX) || defined(EA_PLATFORM_WINDOWS)
         if(mThreadData.mpData)
         {
             mThreadData.mpData->mStartupProcessor = nProcessor; // Assign this in case the thread hasn't started yet and thus we are leaving it a message to set it when it has started.
