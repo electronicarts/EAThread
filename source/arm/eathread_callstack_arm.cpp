@@ -13,10 +13,10 @@
 #endif
 
 #if defined(EA_PLATFORM_WINDOWS) && EA_WINAPI_FAMILY_PARTITION(EA_WINAPI_PARTITION_DESKTOP)
-	#pragma warning(push, 0)
+	EA_DISABLE_ALL_VC_WARNINGS()
 	#include <Windows.h>
 	#include <winternl.h>
-	#pragma warning(pop)
+	EA_RESTORE_ALL_VC_WARNINGS()
 #endif
 
 #if defined(EA_PLATFORM_UNIX)

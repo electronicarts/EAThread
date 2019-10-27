@@ -19,13 +19,9 @@
 #include <stddef.h>
 #include <eathread/internal/eathread_atomic_standalone.h>
 
-
-#ifdef EA_COMPILER_MSVC
-	 #pragma warning(push)
-	 #pragma warning(disable: 4146)  // unary minus operator applied to unsigned type, result still unsigned
-	 #pragma warning(disable: 4339)  // use of undefined type detected in CLR meta-data
-#endif
-
+// 4146: unary minus operator applied to unsigned type, result still unsigned
+// 4339: use of undefined type detected in CLR meta-data
+EA_DISABLE_VC_WARNING(4146 4339)
 
 // This is required for Windows Phone (ARM) because we are temporarily not using
 // CPP11 style atomics and we are depending on the MSVC intrinics.
@@ -720,23 +716,6 @@
 
 #endif // EA_PROCESSOR_X86
 
-
-#ifdef EA_COMPILER_MSVC
-	 #pragma warning(pop)
-#endif
-
+EA_RESTORE_VC_WARNING()
 
 #endif // EATHREAD_X86_EATHREAD_ATOMIC_X86_H
-
-
-
-
-
-
-
-
-
-
-
-
-

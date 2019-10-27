@@ -24,10 +24,10 @@
 #endif
 
 #if defined(EA_COMPILER_MSVC) && defined(EA_PROCESSOR_X86_64)
-	#pragma warning(push, 0)
+	EA_DISABLE_ALL_VC_WARNINGS()
 	#include <math.h>   // VS2008 has an acknowledged bug that requires math.h (and possibly also string.h) to be #included before intrin.h.
 	#include <intrin.h>
-	#pragma warning(pop)
+	EA_RESTORE_ALL_VC_WARNINGS()
 #endif
 
 #if defined(EA_COMPILER_CLANG)

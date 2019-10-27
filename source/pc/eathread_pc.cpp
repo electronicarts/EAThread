@@ -676,8 +676,7 @@ namespace Internal {
 
 		jmp_buf jmpbuf;
 
-		__pragma(warning(push))
-		__pragma(warning(disable : 4611))
+		EA_DISABLE_VC_WARNING(4611)
 		if (!setjmp(jmpbuf))
 		{
 			ThreadNameInfo threadNameInfo = {0x1000, pName, threadId, 0};
@@ -685,7 +684,7 @@ namespace Internal {
 			__except (GetExceptionCode() == 0x406D1388 ? EXCEPTION_EXECUTE_HANDLER : EXCEPTION_CONTINUE_SEARCH) { }
 			longjmp(jmpbuf, 1);
 		}
-		__pragma(warning(pop))
+		EA_RESTORE_VC_WARNING()
 	}
 
 	void SetThreadName(EAThreadDynamicData* pTDD, const char* pName)

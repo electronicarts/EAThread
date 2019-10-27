@@ -14,7 +14,7 @@
 #endif
 
 #ifdef EA_COMPILER_MSVC
-	#pragma warning(push, 0)
+	EA_DISABLE_ALL_VC_WARNINGS()
 	#include <Windows.h>
 	#include <math.h>       // VS2008 has an acknowledged bug that requires math.h (and possibly also string.h) to be #included before intrin.h.
 	#include <intrin.h>
@@ -26,7 +26,7 @@
 		extern "C" NTSYSAPI PEXCEPTION_ROUTINE NTAPI RtlVirtualUnwind(DWORD, DWORD64, DWORD64, PRUNTIME_FUNCTION, PCONTEXT, PVOID*, PDWORD64, PKNONVOLATILE_CONTEXT_POINTERS);
 		extern "C" WINBASEAPI DWORD WINAPI GetModuleFileNameA(HMODULE, LPSTR, DWORD);
 	#endif
-	#pragma warning(pop)
+	EA_RESTORE_ALL_VC_WARNINGS()
 #else
 	#include <Windows.h>
 	#include <winternl.h>

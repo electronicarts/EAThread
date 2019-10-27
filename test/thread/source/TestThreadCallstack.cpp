@@ -19,8 +19,9 @@
 
 
 #ifdef EA_PLATFORM_MICROSOFT
-#pragma warning(push, 0)
+EA_DISABLE_ALL_VC_WARNINGS()
 #include <Windows.h>
+EA_RESTORE_ALL_VC_WARNINGS()
 #endif
 
 

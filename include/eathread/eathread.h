@@ -740,9 +740,9 @@ namespace EA
 	#define EAThreadGetUniqueId(dest) dest = (EA::Thread::ThreadUniqueId)(uintptr_t)__readfsdword(0x18)
 
 #elif defined(EA_COMPILER_MSVC) && defined(EA_PROCESSOR_X86_64)
-	#pragma warning(push, 0)
+	EA_DISABLE_ALL_VC_WARNINGS()
 	#include <intrin.h>
-	#pragma warning(pop)
+	EA_RESTORE_ALL_VC_WARNINGS()
 	#define EAThreadGetUniqueId(dest) dest = (EA::Thread::ThreadUniqueId)(uintptr_t)__readgsqword(0x30)
 	// Could also use dest = (EA::Thread::ThreadUniqueId)NtCurrentTeb(), but that would require #including <windows.h>, which is very heavy.
 

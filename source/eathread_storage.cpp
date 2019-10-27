@@ -47,9 +47,9 @@ EA_RESTORE_VC_WARNING()
 	#if defined(EA_PLATFORM_UNIX)
 		#include <unistd.h>
 	#elif defined(EA_PLATFORM_WINDOWS)
-		#pragma warning(push, 0)
+		EA_DISABLE_ALL_VC_WARNINGS()
 		#include <Windows.h>
-		#pragma warning(pop)
+		EA_RESTORE_ALL_VC_WARNINGS()
 	#endif
 
 	EA::Thread::ThreadLocalStorage::ThreadLocalStorage()
@@ -84,9 +84,9 @@ EA_RESTORE_VC_WARNING()
 
 
 #elif defined(EA_PLATFORM_MICROSOFT) && !defined(EA_PLATFORM_WINDOWS_PHONE) && !(defined(EA_PLATFORM_WINDOWS) && !EA_WINAPI_FAMILY_PARTITION(EA_WINAPI_PARTITION_DESKTOP)) 
-		#pragma warning(push, 0)
+		EA_DISABLE_ALL_VC_WARNINGS()
 		#include <Windows.h>
-		#pragma warning(pop)
+		EA_RESTORE_ALL_VC_WARNINGS()
 
 	EA::Thread::ThreadLocalStorage::ThreadLocalStorage()
 		: mTLSData(TlsAlloc())
@@ -348,7 +348,3 @@ void EA::Thread::ThreadLocalStorageFactory::DestructThreadLocalStorage(EA::Threa
 
 #undef OSEnableInterrupts   
 #undef OSDisableInterrupts
-
-
-
-

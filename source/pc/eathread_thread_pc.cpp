@@ -10,7 +10,7 @@
 #include "eathread/eathread_thread.h"
 #include "eathread/internal/eathread_global.h"
 
-#if EA_COMPILER_VERSION >= 1900 // VS2015+
+#if defined(EA_COMPILER_MSVC) && EA_COMPILER_VERSION >= 1900 // VS2015+
 // required for windows.h that has mismatch that is included in this file
 	EA_DISABLE_VC_WARNING(5031 5032)// #pragma warning(pop): likely mismatch, popping warning state pushed in different file / detected #pragma warning(push) with no corresponding
 #endif
@@ -43,10 +43,6 @@ EA_DISABLE_VC_WARNING(6312 6322)
 
 
 	#ifdef EA_COMPILER_MSVC
-		#ifndef EATHREAD_INIT_SEG_DEFINED
-			#define EATHREAD_INIT_SEG_DEFINED 
-		#endif
-
 		// We are changing the initalization ordering here because in bulkbuild tool builds the initialization 
 		// order of globals changes and causes a crash when we attempt to lock the Mutex guarding access
 		// of the EAThreadDynamicData objects.  The code attempts to lock a mutex that has been destructed
@@ -55,9 +51,11 @@ EA_DISABLE_VC_WARNING(6312 6322)
 		//
 		#ifndef EATHREAD_INIT_SEG_DEFINED
 			#define EATHREAD_INIT_SEG_DEFINED 
-			#pragma warning(disable: 4075) // warning C4075: initializers put in unrecognized initialization area
-			#pragma warning(disable: 4073) //warning C4073: initializers put in library initialization area
+			// warning C4075: initializers put in unrecognized initialization area
+			//warning C4073: initializers put in library initialization area
+			EA_DISABLE_VC_WARNING(4075 4073)
 			#pragma init_seg(lib)
+			#define WARNING_INIT_SEG_PUSHED
 		#endif
 	#endif
 
@@ -820,14 +818,15 @@ EA_DISABLE_VC_WARNING(6312 6322)
 			EA::Thread::Internal::SetThreadName(mThreadData.mpData, pName);
 	}
 
-
+	#ifdef WARNING_INIT_SEG_PUSHED
+		#undef WARNING_INIT_SEG_PUSHED
+		EA_RESTORE_VC_WARNING() // 4073 4075
+	#endif
 #endif // EA_PLATFORM_MICROSOFT
 
-EA_RESTORE_VC_WARNING()
+EA_RESTORE_VC_WARNING() // 6312 6322
 
-#if EA_COMPILER_VERSION >= 1900 // VS2015+
-	EA_RESTORE_VC_WARNING()// #pragma warning(pop): likely mismatch, popping warning state pushed in different file / detected #pragma warning(push) with no corresponding
+#if defined(EA_COMPILER_MSVC) && EA_COMPILER_VERSION >= 1900 // VS2015+
+	EA_RESTORE_VC_WARNING() // 5031 5032
+	// #pragma warning(pop): likely mismatch, popping warning state pushed in different file / detected #pragma warning(push) with no corresponding
 #endif
-
-
-

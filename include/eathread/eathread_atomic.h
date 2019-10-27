@@ -414,10 +414,9 @@ namespace EA
 		#endif
 
 
-		#ifdef EA_COMPILER_MSVC              // VC++ yields spurious warnings about void* being cast to an integer type and vice-versa.
-			#pragma warning(push)        // These warnings are baseless because we check for platform pointer size above.
-			#pragma warning(disable: 4311 4312 4251)
-		#endif
+		// VC++ yields spurious warnings about void* being cast to an integer type and vice-versa.
+		// These warnings are baseless because we check for platform pointer size above.
+		EA_DISABLE_VC_WARNING(4311 4312 4251)
 
 
 		/// class AtomicPointer
@@ -455,9 +454,7 @@ namespace EA
 		};
 
 
-		#ifdef EA_COMPILER_MSVC
-			#pragma warning(pop)
-		#endif
+		EA_RESTORE_VC_WARNING()
 
 	} // namespace Thread
 

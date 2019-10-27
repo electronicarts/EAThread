@@ -14,10 +14,10 @@
 	#include <stdio.h>
 	#include <limits.h>
 	#ifdef EA_PLATFORM_WINDOWS
-		#pragma warning(push, 0)
+		EA_DISABLE_ALL_VC_WARNINGS()
 		#include <pthread.h>
 		#include <Windows.h> // Presumably we are using pthreads-win32.
-		#pragma warning(pop)
+		EA_RESTORE_ALL_VC_WARNINGS()
 		#ifdef CreateSemaphore
 			#undef CreateSemaphore // Windows #defines CreateSemaphore to CreateSemaphoreA or CreateSemaphoreW.
 		#endif

@@ -20,15 +20,13 @@
 
 
 #ifdef EA_COMPILER_MSVC
-	#pragma warning(push, 0)
+	EA_DISABLE_ALL_VC_WARNINGS()
 	#include <math.h>   // VS2008 has an acknowledged bug that requires math.h (and possibly also string.h) to be #included before intrin.h.
 	#include <intrin.h>
-	#pragma warning(pop)
-
-	#pragma warning(push)
-	#pragma warning(disable: 4146)  // unary minus operator applied to unsigned type, result still unsigned
+	EA_RESTORE_ALL_VC_WARNINGS()
 #endif
 
+EA_DISABLE_VC_WARNING(4146)  // unary minus operator applied to unsigned type, result still unsigned
 
 #if defined(EA_PROCESSOR_X86_64)
 
@@ -440,8 +438,6 @@
 
 #endif // EA_PROCESSOR_X86_64
 
-#ifdef EA_COMPILER_MSVC
-	 #pragma warning(pop)
-#endif
+EA_RESTORE_VC_WARNING()
 
 #endif // EATHREAD_X86_64_EATHREAD_ATOMIC_X86_64_H

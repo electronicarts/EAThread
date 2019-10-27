@@ -7,11 +7,7 @@
 #include <eathread/eathread_storage.h>
 #include <string.h>
 
-
-#if defined(EA_COMPILER_MSVC)
-	#pragma warning(disable: 4172) // returning address of local variable or temporary
-#endif
-
+EA_DISABLE_VC_WARNING(4172) // returning address of local variable or temporary
 
 namespace EA
 {
@@ -118,5 +114,4 @@ EATHREADLIB_API void* GetStackLimit()
 } // namespace Thread
 } // namespace EA
 
-
-
+EA_RESTORE_VC_WARNING()
