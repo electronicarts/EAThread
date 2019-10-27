@@ -27,13 +27,11 @@
 	#pragma once // Some compilers (e.g. VC++) benefit significantly from using this. We've measured 3-4% build speed improvements in apps as a result.
 #endif
 
-
-#ifdef _MSC_VER
+#ifdef EA_COMPILER_MSVC
 	#pragma warning(push)           // We have to be careful about disabling this warning. Sometimes the warning is meaningful; sometimes it isn't.
 	#pragma warning(disable: 4251)  // class (some template) needs to have dll-interface to be used by clients.
 	#pragma warning(disable: 6054)  // String 'argument 2' might not be zero-terminated
 #endif
-
 
 namespace EA
 {
@@ -413,18 +411,8 @@ namespace EA
 
 } // namespace EA
 
-
-
-#ifdef _MSC_VER
+#ifdef EA_COMPILER_MSVC
 	#pragma warning(pop)
 #endif
 
-
 #endif // EATHREAD_EATHREAD_RWMUTEX_IP_H
-
-
-
-
-
-
-

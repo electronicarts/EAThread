@@ -27,10 +27,10 @@
         #include <sys/prctl.h>
         #include <sys/syscall.h>
         #include <unistd.h>
-    #elif defined(EA_PLATFORM_APPLE) || defined(__APPLE__)
+    #elif defined(EA_PLATFORM_APPLE)
 		#include <unistd.h>
         #include <dlfcn.h>
-    #elif defined(EA_PLATFORM_BSD) || defined(EA_PLATFORM_CONSOLE_BSD) || defined(__FreeBSD__)
+    #elif defined(EA_PLATFORM_BSD) || defined(EA_PLATFORM_CONSOLE_BSD) || defined(EA_PLATFORM_FREEBSD)
         #include <pthread_np.h>
     #endif
 
@@ -60,7 +60,7 @@ namespace
         #if defined(EA_PLATFORM_WINDOWS)
             param.sched_priority = THREAD_PRIORITY_NORMAL + (nPriority - kThreadPriorityDefault);
 
-        #elif defined(EA_PLATFORM_LINUX) && !defined(__CYGWIN__)
+        #elif defined(EA_PLATFORM_LINUX) && !defined(EA_PLATFORM_CYGWIN)
             // We are assuming Kernel 2.6 and later behaviour, but perhaps we should dynamically detect.
             // Linux supports three scheduling policies SCHED_OTHER, SCHED_RR, and SCHED_FIFO. 
             // The process needs to be run with superuser privileges to use SCHED_RR or SCHED_FIFO.
@@ -95,7 +95,7 @@ namespace
             #endif
 
         #else
-            #if defined(__CYGWIN__)
+            #if defined(EA_PLATFORM_CYGWIN)
                 policy = SCHED_OTHER;
             #else
                 policy = SCHED_FIFO;
@@ -134,14 +134,14 @@ namespace
     {
         using namespace EA::Thread;
 
-        #if defined(EA_PLATFORM_LINUX) && !defined(__CYGWIN__)
+        #if defined(EA_PLATFORM_LINUX) && !defined(EA_PLATFORM_CYGWIN)
             EA_UNUSED(policy);
             return kThreadPriorityDefault + param.sched_priority; // This works for both SCHED_OTHER, SCHED_RR, and SCHED_FIFO.
         #else
             #if defined(EA_PLATFORM_WINDOWS) // In the case of windows, we know for sure that normal priority is defined by 'THREAD_PRIORITY_NORMAL'.
                 if(param.sched_priority == THREAD_PRIORITY_NORMAL)
                     return kThreadPriorityDefault;
-            #elif !(defined(__CYGWIN__) || defined(CS_UNDEFINED_STRING))
+            #elif !(defined(EA_PLATFORM_CYGWIN) || defined(CS_UNDEFINED_STRING))
                 if(policy == SCHED_OTHER)
                     return 0;   // 0 is the only priority permitted with the SCHED_OTHER scheduling scheme.
             #endif
@@ -177,10 +177,10 @@ namespace
             {
                 EAT_ASSERT(pTP->mnStackSize != 0);
 
-                #if !defined(__CYGWIN__)  // Some implementations of pthreads does not support pthread_attr_setstack.
-					#if defined(PTHREAD_STACK_MIN)
-						EAT_ASSERT((pTP->mnStackSize >= PTHREAD_STACK_MIN));
-					#endif
+                #if !defined(EA_PLATFORM_CYGWIN) // Some implementations of pthreads does not support pthread_attr_setstack.
+                    #if defined(PTHREAD_STACK_MIN)
+                        EAT_ASSERT((pTP->mnStackSize >= PTHREAD_STACK_MIN));
+                    #endif
                     result = pthread_attr_setstack(&creationAttribs, (void*)pTP->mpStack, pTP->mnStackSize);
                     EAT_ASSERT(result == 0);
                 #endif

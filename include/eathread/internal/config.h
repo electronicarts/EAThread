@@ -114,7 +114,7 @@ EA_RESTORE_VC_WARNING()
 // Defined as 0 or 1
 //
 #ifndef EA_POSIX_THREADS_AVAILABLE
-	#if defined(__unix__) || defined(__linux__) || defined(__APPLE__) 
+	#if defined(EA_PLATFORM_UNIX) || defined(EA_PLATFORM_LINUX) || defined(EA_PLATFORM_APPLE)
 		#define EA_POSIX_THREADS_AVAILABLE 1
 	#elif defined(EA_PLATFORM_SONY)
 	   #define EA_POSIX_THREADS_AVAILABLE 0  // POSIX threading API is present but use is discouraged by Sony.  They want shipping code to use their scePthreads* API.
@@ -336,13 +336,13 @@ EA_RESTORE_VC_WARNING()
 //
 #ifndef EATHREADLIB_API // If the build file hasn't already defined this to be dllexport...
 	#if EATHREAD_DLL 
-		#if defined(_MSC_VER)
+		#if defined(EA_COMPILER_MSVC) || defined(EA_PLATFORM_MINGW)
 			#define EATHREADLIB_API      __declspec(dllimport)
 			#define EATHREADLIB_LOCAL
-		#elif defined(__CYGWIN__)
+		#elif defined(EA_PLATFORM_CYGWIN)
 			#define EATHREADLIB_API      __attribute__((dllimport))
 			#define EATHREADLIB_LOCAL
-		#elif (defined(__GNUC__) && (__GNUC__ >= 4))
+		#elif (defined(__GNUC__) && (__GNUC__ >= 4)) // GCC AND Clang
 			#define EATHREADLIB_API      __attribute__ ((visibility("default")))
 			#define EATHREADLIB_LOCAL    __attribute__ ((visibility("hidden")))
 		#else
@@ -429,7 +429,7 @@ EA_RESTORE_VC_WARNING()
 // of the operating system (ie: iOS 3) do not provide OS support for 64-bit
 // atomics while later versions (ie: iOS 4/5) do.
 #ifndef EATHREAD_HAS_EMULATED_AND_NATIVE_ATOMICS
-	#if defined(__APPLE__)
+	#if defined(EA_PLATFORM_APPLE)
 		#define EATHREAD_HAS_EMULATED_AND_NATIVE_ATOMICS 1 
 	#else
 		#define EATHREAD_HAS_EMULATED_AND_NATIVE_ATOMICS 0
@@ -444,7 +444,7 @@ EA_RESTORE_VC_WARNING()
 // And even then it's available only some of the time.
 //
 #if !defined(EATHREAD_GLIBC_BACKTRACE_AVAILABLE)
-	#if (defined(__clang__) || defined(__GNUC__)) && (defined(EA_PLATFORM_LINUX) || defined(__APPLE__)) && !defined(__CYGWIN__) && !defined(EA_PLATFORM_ANDROID)
+	#if (defined(EA_COMPILER_CLANG) || defined(EA_COMPILER_GNUC)) && (defined(EA_PLATFORM_LINUX) || defined(EA_PLATFORM_APPLE)) && !defined(EA_PLATFORM_CYGWIN) && !defined(EA_PLATFORM_ANDROID)
 		#define EATHREAD_GLIBC_BACKTRACE_AVAILABLE 1
 	#else
 		#define EATHREAD_GLIBC_BACKTRACE_AVAILABLE 0
@@ -578,7 +578,7 @@ EA_RESTORE_VC_WARNING()
 // EATHREAD_DEBUG_BREAK
 //
 #ifndef EATHREAD_DEBUG_BREAK
-	#ifdef __MSC_VER
+	#ifdef EA_COMPILER_MSVC
 		#define EATHREAD_DEBUG_BREAK() __debugbreak()
 	#else
 		#define EATHREAD_DEBUG_BREAK() *(volatile int*)(0) = 0

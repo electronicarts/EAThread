@@ -216,7 +216,7 @@ namespace EA
 
 		#elif defined(EA_PLATFORM_UNIX) || EA_POSIX_THREADS_AVAILABLE
 
-			#if defined(EA_PLATFORM_LINUX) || defined(__CYGWIN__) || (_POSIX_TIMERS > 0)
+			#if defined(EA_PLATFORM_LINUX) || defined(EA_PLATFORM_CYGWIN) || (_POSIX_TIMERS > 0)
 				ThreadTime threadTime;
 				clock_gettime(CLOCK_REALTIME, &threadTime);  // If you get a linker error about clock_getttime, you need to link librt.a (specify -lrt to the linker).
 				return threadTime;

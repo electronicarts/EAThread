@@ -31,7 +31,7 @@
 #endif
 
 
-#if defined(__LP64__)
+#if EA_PLATFORM_PTR_SIZE == 8
 typedef struct mach_header_64     MachHeader;
 typedef struct segment_command_64 SegmentCommand;
 typedef struct section_64         Section;

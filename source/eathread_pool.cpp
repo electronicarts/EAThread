@@ -8,7 +8,7 @@
 #include <string.h>
 #include <new>
 
-#if   defined(_MSC_VER)
+#if defined(EA_COMPILER_MSVC)
 	#pragma warning(push)
 	#pragma warning(disable: 6011) // Dereferencing NULL pointer 'gpAllocator'
 	#pragma warning(disable: 6211) // Leaking memory 'pThreadInfo' due to an exception.
@@ -91,7 +91,7 @@ EA::Thread::ThreadPool::~ThreadPool()
 }
 
 
-#ifdef _MSC_VER
+#ifdef EA_COMPILER_MSVC
 	#pragma warning(push)
 	#pragma warning(disable: 4296 4706) // '>=' : expression is always true and assignment within conditional expression (in the assert)
 #endif
@@ -169,7 +169,7 @@ bool EA::Thread::ThreadPool::Init(const ThreadPoolParameters* pThreadPoolParamet
 }
 
 
-#ifdef _MSC_VER
+#ifdef EA_COMPILER_MSVC
 	#pragma warning(pop)
 #endif
 
@@ -704,7 +704,7 @@ void EA::Thread::ThreadPoolFactory::DestructThreadPool(EA::Thread::ThreadPool* p
 }
 
 
-#if defined(_MSC_VER)
+#if defined(EA_COMPILER_MSVC)
 	#pragma warning(pop)
 #endif
 

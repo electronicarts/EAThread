@@ -20,7 +20,7 @@
 		#include <time.h>
 	#else
 		#include <unistd.h>
-		#if defined(_YVALS)
+		#if defined(EA_HAVE_DINKUMWARE_CPP_LIBRARY)
 			#include <time.h>
 		#else
 			#include <sys/time.h>
@@ -35,11 +35,11 @@
 			#include <sys/prctl.h>
 		#endif
 
-		#if defined(EA_PLATFORM_APPLE) || defined(__APPLE__)
+		#if defined(EA_PLATFORM_APPLE)
 			#include <dlfcn.h>
 		#endif
 	
-		#if defined(EA_PLATFORM_BSD) || defined(EA_PLATFORM_CONSOLE_BSD) || defined(__FreeBSD__)
+		#if defined(EA_PLATFORM_BSD) || defined(EA_PLATFORM_CONSOLE_BSD) || defined(EA_PLATFORM_FREEBSD)
 			#include <sys/param.h>
 			#include <pthread_np.h>
 		#endif
@@ -86,13 +86,13 @@
 
 		if(result == 0)
 		{
-			#if defined(EA_PLATFORM_LINUX) && !defined(__CYGWIN__)
+			#if defined(EA_PLATFORM_LINUX) && !defined(EA_PLATFORM_CYGWIN)
 				return kThreadPriorityDefault + param.sched_priority; // This works for both SCHED_OTHER, SCHED_RR, and SCHED_FIFO.
 			#else
 				#if defined(EA_PLATFORM_WINDOWS)
 					if(param.sched_priority == THREAD_PRIORITY_NORMAL)
 						return kThreadPriorityDefault;
-				#elif !(defined(__CYGWIN__) || defined(CS_UNDEFINED_STRING))
+				#elif !(defined(EA_PLATFORM_CYGWIN) || defined(CS_UNDEFINED_STRING))
 					if(policy == SCHED_OTHER)
 						return 0; // 0 is the only native priority permitted with the SCHED_OTHER scheduling scheme.
 				#endif
@@ -125,7 +125,7 @@
 
 		EAT_ASSERT(nPriority != kThreadPriorityUnknown);
 
-		#if defined(EA_PLATFORM_LINUX) && !defined(__CYGWIN__)
+		#if defined(EA_PLATFORM_LINUX) && !defined(EA_PLATFORM_CYGWIN)
 			// We are assuming Kernel 2.6 and later behavior, but perhaps we should dynamically detect.
 			// Linux supports three scheduling policies SCHED_OTHER, SCHED_RR, and SCHED_FIFO. 
 			// The process needs to be run with superuser privileges to use SCHED_RR or SCHED_FIFO.
@@ -155,7 +155,7 @@
 			if(result == 0)
 			{
 				// Cygwin does not support any scheduling policy other than SCHED_OTHER.
-				#if !defined(__CYGWIN__)
+				#if !defined(EA_PLATFORM_CYGWIN)
 					if(policy == SCHED_OTHER)
 						policy = SCHED_FIFO;
 				#endif
@@ -203,7 +203,7 @@
 			thr_stksegment(&s);
 			return s.ss_sp;  // Note that this is not the sp pointer (which would refer to the a location low in the stack address space). When returned by thr_stksegment(), ss_sp refers to the top (base) of the stack.
 
-		#elif defined(__CYGWIN__)
+		#elif defined(EA_PLATFORM_CYGWIN)
 			// Cygwin reserves pthread_attr_getstackaddr and pthread_attr_getstacksize for future use.
 			// The solution here is probably to use the Windows implementation of this here.
 			return 0;
@@ -216,7 +216,7 @@
 			pthread_attr_t sattr;
 			pthread_attr_init(&sattr);
 
-			#if defined(EA_PLATFORM_BSD) || defined(EA_PLATFORM_CONSOLE_BSD) || defined(__FreeBSD__)
+			#if defined(EA_PLATFORM_BSD) || defined(EA_PLATFORM_CONSOLE_BSD) || defined(EA_PLATFORM_FREEBSD)
 				pthread_attr_get_np(threadId, &sattr);
 			#elif defined(EA_HAVE_pthread_getattr_np_DECL)
 				// Note: this function is non-portable; various Unix systems may have different np alternatives
@@ -284,7 +284,7 @@
 	}
 
 
-	#if defined(EA_PLATFORM_WINDOWS) && defined(EA_PROCESSOR_X86) && defined(MSC_VER) && (MSC_VER >= 1400)
+	#if defined(EA_PLATFORM_WINDOWS) && defined(EA_PROCESSOR_X86) && defined(EA_COMPILER_MSVC) && (EA_COMPILER_VERSION >= 1400)
 		int GetCurrentProcessorNumberXP()
 		{
 			_asm { mov eax, 1   }
@@ -316,7 +316,7 @@
 			if(pfnGetCurrentProcessorNumber)
 				return (int)(unsigned)pfnGetCurrentProcessorNumber();
 
-			#if defined(EA_PLATFORM_WINDOWS) && defined(EA_PROCESSOR_X86) && defined(MSC_VER) && (MSC_VER >= 1400)
+			#if defined(EA_PLATFORM_WINDOWS) && defined(EA_PROCESSOR_X86) && defined(EA_COMPILER_MSVC) && (EA_COMPILER_VERSION >= 1400)
 				return GetCurrentProcessorNumberXP();
 			#else
 				return 0;
@@ -422,7 +422,7 @@
 					nameBuf[15] = 0;
 					prctl(PR_SET_NAME, (unsigned long)nameBuf, 0, 0, 0);
 
-				#elif defined(EA_PLATFORM_APPLE) || defined(__APPLE__)
+				#elif defined(EA_PLATFORM_APPLE)
 					// http://src.chromium.org/viewvc/chrome/trunk/src/base/platform_thread_mac.mm?revision=49465&view=markup&pathrev=49465
 					// "There's a non-portable function for doing this: pthread_setname_np.
 					// It's supported by OS X >= 10.6 and the Xcode debugger will show the thread
@@ -440,7 +440,7 @@
 						pthread_setname_np_ptr(nameBuf);
 					}
 
-				#elif defined(EA_PLATFORM_BSD) || defined(EA_PLATFORM_CONSOLE_BSD) || defined(__FreeBSD__)
+				#elif defined(EA_PLATFORM_BSD) || defined(EA_PLATFORM_CONSOLE_BSD) || defined(EA_PLATFORM_FREEBSD)
 					// http://www.unix.com/man-page/freebsd/3/PTHREAD_SET_NAME_NP/
 					pthread_set_name_np(pthread_self(), pName);
 				#endif
@@ -637,7 +637,7 @@
 	
 	EA::Thread::ThreadTime EA::Thread::GetThreadTime()
 	{
-		#if defined(EA_PLATFORM_WINDOWS) && !defined(__CYGWIN__)
+		#if defined(EA_PLATFORM_WINDOWS) && !defined(EA_PLATFORM_CYGWIN)
 			// We use this code instead of GetTickCount or similar because pthreads under
 			// Win32 uses the 'system file time' definition (e.g. GetSystemTimeAsFileTime()) 
 			// for current time. The implementation here is just like that in the 
@@ -659,7 +659,7 @@
 			//return threadTime;
 		#else
 			// For some systems we may need to use gettimeofday() instead of clock_gettime().
-			#if defined(EA_PLATFORM_LINUX) || defined(__CYGWIN__) || (_POSIX_TIMERS > 0)
+			#if defined(EA_PLATFORM_LINUX) || defined(EA_PLATFORM_CYGWIN) || (_POSIX_TIMERS > 0)
 				ThreadTime threadTime;
 				clock_gettime(CLOCK_REALTIME, &threadTime);  // If you get a linker error about clock_getttime, you need to link librt.a (specify -lrt to the linker).
 				return threadTime;

@@ -9,7 +9,7 @@
 
 #if defined(EA_PLATFORM_WIN32) && EA_WINAPI_FAMILY_PARTITION(EA_WINAPI_PARTITION_DESKTOP) // The following only works on Win32 and not Win64.
 
-#if defined(_MSC_VER)
+#if defined(EA_COMPILER_MSVC)
 	#pragma warning(push, 0)
 #endif
 
@@ -17,12 +17,12 @@
 #include <DbgHelp.h>
 #include <stdio.h>
 
-#if defined(_MSC_VER)
+#if defined(EA_COMPILER_MSVC)
 	#pragma warning(pop)
 #endif
 
 
-#ifdef _MSC_VER
+#ifdef EA_COMPILER_MSVC
 	#pragma warning(disable: 4740)      // flow in or out of inline asm code suppresses global optimization
 	#pragma comment(lib, "dbghelp.lib")
 	#pragma comment(lib, "psapi.lib")

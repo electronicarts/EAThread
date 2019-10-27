@@ -35,7 +35,7 @@
 		return true;
 	}
 
-#elif defined(__APPLE__) && EATHREAD_MANUAL_FUTEX_ENABLED
+#elif defined(EA_PLATFORM_APPLE) && EATHREAD_MANUAL_FUTEX_ENABLED
 	#include <semaphore.h>
 	#include <stdio.h>
 	#include <errno.h>
@@ -180,7 +180,7 @@
 
 	void EA::Thread::Futex::DestroyFSemaphore()
 	{
-		#if defined (__APPLE__)
+		#if defined (EA_PLATFORM_APPLE)
 			sem_close(&mSemaphore);
 		#elif defined(EA_PLATFORM_ANDROID)
 			sem_destroy(&mSemaphore);   // Android's sem_destroy is broken. http://code.google.com/p/android/issues/detail?id=3106

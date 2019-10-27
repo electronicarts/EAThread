@@ -17,8 +17,7 @@
 #include <eathread/eathread_atomic.h>
 #include <new>
 
-
-#ifdef _MSC_VER
+#ifdef EA_COMPILER_MSVC
 	 #pragma warning(push)
 	 #pragma warning(disable: 4100) // (Compiler claims pRWSpinLock is unreferenced)
 #endif
@@ -392,17 +391,8 @@ namespace EA
 
 } // namespace EA
 
-
-
-#ifdef _MSC_VER
+#ifdef EA_COMPILER_MSVC
 	#pragma warning(pop)
 #endif
 
-
 #endif // EATHREAD_EATHREAD_RWSPINLOCK_H
-
-
-
-
-
-

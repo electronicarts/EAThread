@@ -8,7 +8,7 @@
 #include <string.h>
 
 
-#if defined(_MSC_VER)
+#if defined(EA_COMPILER_MSVC)
 	#pragma warning(disable: 4172) // returning address of local variable or temporary
 #endif
 

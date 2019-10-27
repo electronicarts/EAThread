@@ -865,7 +865,7 @@ int TestThreadThread()
 		// It turns out that you can't really do such a thing as set lower priority with most Unix threading subsystems. 
 		// You can do so with Cygwin because it is just a pthreads API running on Windows OS/threading.
 		// C++11 thread libraries also provide no means to set or query thread priority.
-		#if (!defined(EA_PLATFORM_UNIX) || defined(__CYGWIN__)) && !EA_USE_CPP11_CONCURRENCY
+		#if (!defined(EA_PLATFORM_UNIX) || defined(EA_PLATFORM_CYGWIN)) && !EA_USE_CPP11_CONCURRENCY
 			int  nPriority1;
 			bool bResult;
 

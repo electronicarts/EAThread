@@ -26,7 +26,7 @@
 #include <stddef.h>
 
 
-#if defined(EA_DLL) && defined(_MSC_VER)
+#if defined(EA_DLL) && defined(EA_COMPILER_MSVC)
 	// Suppress warning about class 'EA::Thread::simple_list<T>' needs to have
 	// dll-interface to be used by clients of class which have a templated member.
 	// 
@@ -282,7 +282,7 @@ namespace EA
 
 
 
-#if defined(EA_DLL) && defined(_MSC_VER)
+#if defined(EA_DLL) && defined(EA_COMPILER_MSVC)
 	// re-enable warning 4251 (it's a level-1 warning and should not be suppressed globally)
 	#pragma warning(pop)
 #endif

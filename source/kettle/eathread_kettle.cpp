@@ -10,7 +10,7 @@
 
 #include <sched.h>
 #include <unistd.h>
-#if defined(_YVALS)
+#if defined(EA_HAVE_DINKUMWARE_CPP_LIBRARY)
 	#include <time.h>
 #else
 	#include <sys/time.h>

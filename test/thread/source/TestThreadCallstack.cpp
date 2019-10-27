@@ -18,7 +18,7 @@
 #include <eathread/eathread_semaphore.h>
 
 
-#ifdef _MSC_VER
+#ifdef EA_PLATFORM_MICROSOFT
 #pragma warning(push, 0)
 #include <Windows.h>
 #endif

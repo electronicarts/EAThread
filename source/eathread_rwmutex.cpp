@@ -2,7 +2,9 @@
 // Copyright (c) Electronic Arts Inc. All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#if defined(_MSC_VER)
+#include <EABase/eabase.h>
+
+#if defined(EA_COMPILER_MSVC)
 	#pragma warning(disable: 4985)  // 'ceil': attributes not present on previous declaration.1>    C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\INCLUDE\intrin.h(142) : see declaration of 'ceil'
 #endif
 
@@ -13,7 +15,7 @@
 #include <new> // include new for placement new operator
 #include <string.h>
 
-#ifdef _MSC_VER
+#ifdef EA_COMPILER_MSVC
 	#pragma warning(disable : 4996) // This function or variable may be unsafe / deprecated.
 #endif
 

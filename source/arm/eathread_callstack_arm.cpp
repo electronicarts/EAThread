@@ -168,14 +168,14 @@ EATHREADLIB_API void ShutdownCallstack()
 			context = *pContext;
 		else
 		{
-			#if defined(__ARMCC_VERSION)
+			#if defined(EA_COMPILER_ARM)
 				context.mFP = 0; // We don't currently have a simple way to read fp (which is r7 (Thumb) or r11 (ARM)).
 				context.mSP = (uintptr_t)__current_sp();
 				context.mLR = (uintptr_t)__return_address();
 				GetInstructionPointer(p); // Intentionally don't call __current_pc() or EAGetInstructionPointer, because these won't set the Thumb bit it this is Thumb code.
 				context.mPC = (uintptr_t)p;
 
-			#elif defined(__GNUC__) || defined(EA_COMPILER_CLANG) // Including Apple iOS.
+			#elif defined(EA_COMPILER_GNUC) || defined(EA_COMPILER_CLANG) // Including Apple iOS.
 				void* spAddress = &context.mSP;
 				void* sp;
 				asm volatile(
@@ -201,7 +201,7 @@ EATHREADLIB_API void ShutdownCallstack()
 			#endif
 		}
 
-		#if defined(__APPLE__)
+		#if defined(EA_PLATFORM_APPLE)
 			// We have reason to believe that the following should be reliable. But if it's not then we should
 			// just call the code below.
 			entryCount = GetCallstackARMApple(pReturnAddressArray, nReturnAddressArrayCapacity, &context);
@@ -275,12 +275,12 @@ EATHREADLIB_API bool GetCallstackContext(CallstackContext& context, intptr_t thr
 			void* p;
 
 			// TODO: make defines of this so that the implementation between us and GetCallstack remains the same
-			#if defined(__ARMCC_VERSION)
+			#if defined(EA_COMPILER_ARM)
 				context.mSP = (uint32_t)__current_sp();
 				context.mLR = (uint32_t)__return_address();
 				context.mPC = (uint32_t)__current_pc();
 
-			#elif defined(__GNUC__) || defined(EA_COMPILER_CLANG)
+			#elif defined(EA_COMPILER_GNUC) || defined(EA_COMPILER_CLANG)
 				// register uintptr_t current_sp asm ("sp");
 				p = __builtin_frame_address(0);
 				context.mSP = (uintptr_t)p;
@@ -291,7 +291,7 @@ EATHREADLIB_API bool GetCallstackContext(CallstackContext& context, intptr_t thr
 				EAGetInstructionPointer(p);
 				context.mPC = reinterpret_cast<uintptr_t>(p);
 
-			#elif defined(_MSC_VER)
+			#elif defined(EA_COMPILER_MSVC)
 				context.mSP = 0;
 
 				#error EACallstack::GetCallstack: Need a way to get the return address (register 14)
@@ -347,9 +347,9 @@ EATHREADLIB_API void SetStackBase(void* pStackBase)
 		// Can't call GetStackLimit() because doing so would disturb the stack. 
 		// As of this writing, we don't have an EAGetStackTop macro which could do this.
 		// So we implement it inline here.
-		#if   defined(__ARMCC_VERSION)
+		#if   defined(EA_COMPILER_ARM)
 			pStackBase = (void*)__current_sp();
-		#elif defined(__GNUC__) || defined(EA_COMPILER_CLANG)
+		#elif defined(EA_COMPILER_GNUC) || defined(EA_COMPILER_CLANG)
 			pStackBase = __builtin_frame_address(0);
 		#endif
 
@@ -389,9 +389,9 @@ EATHREADLIB_API void* GetStackLimit()
 			return pLimit;
 	#endif
 
-	#if   defined(__ARMCC_VERSION)
+	#if   defined(EA_COMPILER_ARM)
 		void* pStack = (void*)__current_sp();
-	#elif defined(__GNUC__) || defined(EA_COMPILER_CLANG)
+	#elif defined(EA_COMPILER_GNUC) || defined(EA_COMPILER_CLANG)
 		void* pStack = __builtin_frame_address(0);
 	#else
 		void* pStack = NULL;  // TODO:  determine fix.

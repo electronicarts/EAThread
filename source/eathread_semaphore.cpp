@@ -16,7 +16,7 @@ EA_RESTORE_VC_WARNING()
 	// Fall through.
 #elif 0 //EA_USE_CPP11_CONCURRENCY
 	#include "cpp11/eathread_semaphore_cpp11.cpp"
-#elif defined(__APPLE__)
+#elif defined(EA_PLATFORM_APPLE)
 	#include "apple/eathread_semaphore_apple.cpp"
 #elif defined(EA_PLATFORM_ANDROID)
 	#include "android/eathread_semaphore_android.cpp"

@@ -13,7 +13,7 @@
 	#define _WIN32_WINNT 0x0500
 #endif
 
-#ifdef _MSC_VER
+#ifdef EA_COMPILER_MSVC
 	#pragma warning(push, 0)
 	#include <Windows.h>
 	#include <math.h>       // VS2008 has an acknowledged bug that requires math.h (and possibly also string.h) to be #included before intrin.h.
@@ -38,7 +38,7 @@
 // when compiler optimizations are enabled for this code.
 // This function is not performance-sensitive and so disabling 
 // optimizations shouldn't matter.
-#if defined(_MSC_VER) && (defined(_M_AMD64) || defined(_WIN64))
+#if defined(EA_COMPILER_MSVC) && defined(EA_PLATFORM_WIN64)
 	#pragma optimize("", off) 
 #endif
 
@@ -78,7 +78,7 @@
 
 		PVOID WINAPI RtlLookupFunctionEntry(ULONG64 ControlPC, PULONG64 ImageBase, PUNWIND_HISTORY_TABLE HistoryTable);
 
-		#if !defined(_MSC_VER) || (_MSC_VER < 1500) // if earlier than VS2008...
+		#if !defined(EA_COMPILER_MSVC) || (EA_COMPILER_MSVC < 1500) // if earlier than VS2008...
 			typedef struct _KNONVOLATILE_CONTEXT_POINTERS
 			{ 
 				PULONGLONG dummy; 
@@ -149,7 +149,7 @@ static bool IsAddressReadable(const void* pAddress)
 	//
 	static EA_NO_INLINE void* GetRSP()
 	{
-		#if defined(_MSC_VER)
+		#if defined(EA_COMPILER_MSVC)
 			uintptr_t ara = (uintptr_t)_AddressOfReturnAddress();
 		#else
 			uintptr_t ara = (uintptr_t)__builtin_frame_address();
@@ -164,9 +164,9 @@ static bool IsAddressReadable(const void* pAddress)
 //
 EATHREADLIB_API EA_NO_INLINE void GetInstructionPointer(void*& pInstruction)
 {
-	#if defined(_MSC_VER)
+	#if defined(EA_COMPILER_MSVC)
 		pInstruction = _ReturnAddress();
-	#elif defined(__GNUC__) || defined(EA_COMPILER_CLANG)
+	#elif defined(EA_COMPILER_GNUC) || defined(EA_COMPILER_CLANG)
 		pInstruction = __builtin_return_address(0);
 	#else
 		void* pReturnAddressArray[2] = { 0, 0 };
@@ -613,7 +613,7 @@ EATHREADLIB_API void* GetStackLimit()
 } // namespace EA
 
 
-#if defined(_MSC_VER) && (defined(_M_AMD64) || defined(_WIN64))
+#if defined(EA_COMPILER_MSVC) && defined(EA_PLATFORM_WIN64)
 	#pragma optimize("", on) // See comments above regarding this optimization change.
 #endif
 

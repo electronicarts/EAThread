@@ -30,7 +30,7 @@ EA_DISABLE_VC_WARNING(6312 6322)
 		#include <Windows.h>
 		EA_RESTORE_ALL_VC_WARNINGS()
 
-		#if defined(_MSC_VER)
+		#if defined(EA_COMPILER_MSVC)
 			struct ThreadNameInfo{
 				DWORD  dwType;
 				LPCSTR lpName;
@@ -42,7 +42,7 @@ EA_DISABLE_VC_WARNING(6312 6322)
 		#endif
 
 
-	#ifdef _MSC_VER
+	#ifdef EA_COMPILER_MSVC
 		#ifndef EATHREAD_INIT_SEG_DEFINED
 			#define EATHREAD_INIT_SEG_DEFINED 
 		#endif

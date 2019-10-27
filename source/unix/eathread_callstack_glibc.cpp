@@ -73,7 +73,7 @@ EATHREADLIB_API size_t GetCallstack(void* pReturnAddressArray[], size_t nReturnA
 		
 		return count;
 
-	#elif defined(__APPLE__) && defined(EA_PROCESSOR_X86)
+	#elif defined(EA_PLATFORM_APPLE) && defined(EA_PROCESSOR_X86)
 		// Apple's ABI defines a callstack frame system.
 		// http://developer.apple.com/library/mac/#documentation/DeveloperTools/Conceptual/LowLevelABI/100-32-bit_PowerPC_Function_Calling_Conventions/32bitPowerPC.html#//apple_ref/doc/uid/TP40002438-SW20
 		// Apple x86 stack frame:

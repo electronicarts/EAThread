@@ -17,7 +17,7 @@
 #include <eathread/eathread.h>
 
 
-#if defined(EA_DLL) && defined(_MSC_VER)
+#if defined(EA_DLL) && defined(EA_COMPILER_MSVC)
 	// Suppress warning about class 'AtomicInt32' needs to have a
 	// dll-interface to be used by clients of class which have a templated member.
 	// 
@@ -227,7 +227,7 @@ namespace EA
 } // namespace EA
 
 
-#if defined(EA_DLL) && defined(_MSC_VER)
+#if defined(EA_DLL) && defined(EA_COMPILER_MSVC)
    // re-enable warning(s) disabled above.
    #pragma warning(pop)
 #endif

@@ -100,7 +100,7 @@
 	EA_RESTORE_VC_WARNING()
 #elif defined(EA_PLATFORM_UNIX) || EA_POSIX_THREADS_AVAILABLE
 	#include <pthread.h>
-	#if defined(_YVALS)         // Dinkumware doesn't usually provide gettimeofday or <sys/types.h>
+	#if defined(EA_HAVE_DINKUMWARE_CPP_LIBRARY)         // Dinkumware doesn't usually provide gettimeofday or <sys/types.h>
 		#include <time.h>       // clock_gettime
 	#elif defined(EA_PLATFORM_UNIX)
 		#include <sys/time.h>   // gettimeofday
@@ -728,7 +728,7 @@ namespace EA
 #if EA_USE_CPP11_CONCURRENCY
 	#define EAThreadGetUniqueId(dest) (dest = static_cast<uintptr_t>(std::hash<std::thread::id>()(std::this_thread::get_id())))
 
-#elif defined(EA_PLATFORM_WINDOWS) && defined(_MSC_VER) && !defined(_WIN64)
+#elif defined(EA_PLATFORM_WINDOWS) && defined(EA_COMPILER_MSVC) && !defined(EA_PLATFORM_WIN64)
 
 	// Reference implementation:
 	//extern "C" __declspec(dllimport) unsigned long __stdcall GetCurrentThreadId();
@@ -739,7 +739,7 @@ namespace EA
 	#pragma intrinsic(__readfsdword)
 	#define EAThreadGetUniqueId(dest) dest = (EA::Thread::ThreadUniqueId)(uintptr_t)__readfsdword(0x18)
 
-#elif defined(_MSC_VER) && defined(EA_PROCESSOR_X86_64)
+#elif defined(EA_COMPILER_MSVC) && defined(EA_PROCESSOR_X86_64)
 	#pragma warning(push, 0)
 	#include <intrin.h>
 	#pragma warning(pop)

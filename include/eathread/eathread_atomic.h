@@ -414,7 +414,7 @@ namespace EA
 		#endif
 
 
-		#ifdef _MSC_VER                  // VC++ yields spurious warnings about void* being cast to an integer type and vice-versa.
+		#ifdef EA_COMPILER_MSVC              // VC++ yields spurious warnings about void* being cast to an integer type and vice-versa.
 			#pragma warning(push)        // These warnings are baseless because we check for platform pointer size above.
 			#pragma warning(disable: 4311 4312 4251)
 		#endif
@@ -455,7 +455,7 @@ namespace EA
 		};
 
 
-		#ifdef _MSC_VER
+		#ifdef EA_COMPILER_MSVC
 			#pragma warning(pop)
 		#endif
 

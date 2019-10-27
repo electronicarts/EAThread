@@ -96,18 +96,20 @@ namespace EA
 				#define EA_THREAD_LOCAL thread_local
 			#endif
 
-		#elif defined(__APPLE__)
+		#elif defined(EA_PLATFORM_APPLE)
 			// http://clang.llvm.org/docs/LanguageExtensions.html
 			#if __has_feature(cxx_thread_local)
 				#define EA_THREAD_LOCAL thread_local
 			#else
 				#define EA_THREAD_LOCAL 
 			#endif
-		#elif (defined(__GNUC__) && ((__GNUC__ >= 4) || ((__GNUC__ == 3) && (__GNUC_MINOR__ >= 3)))) && (defined(EA_PLATFORM_WINDOWS) || defined(EA_PLATFORM_UNIX)) // Any of the Unix variants, including Mac OSX.
+		#elif ((defined(__GNUC__) && ((__GNUC__ >= 4) || ((__GNUC__ == 3) && (__GNUC_MINOR__ >= 3))))) \
+			&& (defined(EA_PLATFORM_WINDOWS) || defined(EA_PLATFORM_UNIX)) // Any of the Unix variants, including Mac OSX.
 			// While GNUC v3.3 is the first version that supports thread local storage
 			// declarators, not all versions of GNUC for all platforms support it, 
 			// as it requires support from other tools and libraries beyond the compiler.
-			#if defined(__CYGWIN__) // Cygwin's branch of the GCC toolchain does not currently support TLS.
+			// Rafaël: Using __GNUC__ and __GNUC_MINOR__ here to put Clang in the equation too.
+			#if defined(EA_PLATFORM_CYGWIN) // Cygwin's branch of the GCC toolchain does not currently support TLS.
 				// Not supported.
 			#else
 				#define EA_THREAD_LOCAL __thread

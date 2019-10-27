@@ -20,7 +20,7 @@
 #include <eathread/internal/eathread_atomic_standalone.h>
 
 
-#ifdef _MSC_VER
+#ifdef EA_COMPILER_MSVC
 	 #pragma warning(push)
 	 #pragma warning(disable: 4146)  // unary minus operator applied to unsigned type, result still unsigned
 	 #pragma warning(disable: 4339)  // use of undefined type detected in CLR meta-data
@@ -95,7 +95,7 @@
 				volatile ValueType mValue;
 			};
 
-			#if defined(EA_PLATFORM_MICROSOFT) && defined(_MSC_VER)
+			#if defined(EA_PLATFORM_MICROSOFT) && defined(EA_COMPILER_MSVC)
 
 				// 32 bit versions
 				template<> inline
@@ -251,7 +251,7 @@
 			#elif defined(EA_COMPILER_GNUC) || defined (EA_COMPILER_CLANG)
 
 				// Recent versions of GCC have atomic primitives built into the compiler and standard library.
-				#if defined (EA_COMPILER_CLANG) || defined(__APPLE__) || (defined(__GNUC__) && (((__GNUC__ * 100) + __GNUC_MINOR__) >= 403)) // GCC 4.3 or later
+				#if defined (EA_COMPILER_CLANG) || defined(EA_PLATFORM_APPLE) || (defined(EA_COMPILER_GNUC) && EA_COMPILER_VERSION >= 4003) // GCC 4.3 or later
 
 					template <> inline
 					AtomicInt<int32_t>::ValueType AtomicInt<int32_t>::GetValue() const
@@ -721,7 +721,7 @@
 #endif // EA_PROCESSOR_X86
 
 
-#ifdef _MSC_VER
+#ifdef EA_COMPILER_MSVC
 	 #pragma warning(pop)
 #endif
 

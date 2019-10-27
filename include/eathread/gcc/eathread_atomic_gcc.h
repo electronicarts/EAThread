@@ -73,7 +73,10 @@ namespace EA
 
 
 		// Recent versions of GCC have atomic primitives built into the compiler and standard library.
-		#if defined(EA_COMPILER_CLANG) || defined(__APPLE__) || (defined(__GNUC__) && (((__GNUC__ * 100) + __GNUC_MINOR__) >= 403)) || defined(EA_COMPILER_RVCT) // GCC 4.3 or later. Depends on the GCC implementation.
+		#if defined(EA_COMPILER_CLANG) \
+			|| defined(EA_PLATFORM_APPLE) \
+			|| (defined(EA_COMPILER_GNUC) && (EA_COMPILER_VERSION >= 4003)) \
+			|| defined(EA_COMPILER_RVCT) // GCC 4.3 or later. Depends on the GCC implementation.
 
 			template <> inline
 			AtomicInt<int32_t>::ValueType AtomicInt<int32_t>::GetValue() const
