@@ -8,13 +8,10 @@
 #include <string.h>
 #include <new>
 
-#if   defined(_MSC_VER)
-	#pragma warning(push)
-	#pragma warning(disable: 6011) // Dereferencing NULL pointer 'gpAllocator'
-	#pragma warning(disable: 6211) // Leaking memory 'pThreadInfo' due to an exception.
-	#pragma warning(disable: 6326) // Potential comparison of a constant with another constant
-#endif
-
+// 6011: Dereferencing NULL pointer 'gpAllocator'
+// 6211: Leaking memory 'pThreadInfo' due to an exception.
+// 6326: Potential comparison of a constant with another constant
+EA_DISABLE_VC_WARNING(6011 6211 6326)
 
 namespace EA
 {
@@ -91,10 +88,7 @@ EA::Thread::ThreadPool::~ThreadPool()
 }
 
 
-#ifdef _MSC_VER
-	#pragma warning(push)
-	#pragma warning(disable: 4296 4706) // '>=' : expression is always true and assignment within conditional expression (in the assert)
-#endif
+EA_DISABLE_VC_WARNING(4296 4706) // '>=' : expression is always true and assignment within conditional expression (in the assert)
 
 
 #if EAT_ASSERT_ENABLED
@@ -169,9 +163,7 @@ bool EA::Thread::ThreadPool::Init(const ThreadPoolParameters* pThreadPoolParamet
 }
 
 
-#ifdef _MSC_VER
-	#pragma warning(pop)
-#endif
+EA_RESTORE_VC_WARNING() // 4296 4706
 
 
 bool EA::Thread::ThreadPool::Shutdown(JobWait jobWait, const ThreadTime& timeoutAbsolute)
@@ -703,9 +695,4 @@ void EA::Thread::ThreadPoolFactory::DestructThreadPool(EA::Thread::ThreadPool* p
 	pThreadPool->~ThreadPool();
 }
 
-
-#if defined(_MSC_VER)
-	#pragma warning(pop)
-#endif
-
-
+EA_RESTORE_VC_WARNING()

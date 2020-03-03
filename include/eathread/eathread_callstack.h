@@ -182,7 +182,7 @@ namespace EA
 		///    void* pInstruction;
 		///    EAGetInstructionPointer(pInstruction);
 		///
-		#if defined(_MSC_VER) && defined(EA_PROCESSOR_X86)
+		#if defined(EA_COMPILER_MSVC) && defined(EA_PROCESSOR_X86)
 			// We implement this via calling the next line of code as a function.
 			// Then we continue as if we were exiting that function but with no
 			// return statement. The result is that the instruction pointer will
@@ -204,13 +204,13 @@ namespace EA
 				{EAGetInstructionPointer(p);}
 			EA_RESTORE_VC_WARNING()
 
-		#elif defined(_MSC_VER) && (defined(EA_PROCESSOR_X86_64) || defined(EA_PROCESSOR_ARM))
+		#elif defined(EA_COMPILER_MSVC) && (defined(EA_PROCESSOR_X86_64) || defined(EA_PROCESSOR_ARM))
 
 			EATHREADLIB_API EA_NO_INLINE void GetInstructionPointer(void*& p);
 
 			#define EAGetInstructionPointer(p) EA::Thread::GetInstructionPointer(p)
 
-		#elif defined(__ARMCC_VERSION) // ARM compiler
+		#elif defined(EA_COMPILER_ARM) // ARM compiler
 
 			// Even if there are compiler intrinsics that let you get the instruction pointer, 
 			// this function can still be useful. For example, on ARM platforms this function
@@ -226,7 +226,7 @@ namespace EA
 		//    // To do: implement this directly instead of via a call to GetInstructionPointer.
 		//    #define EAGetInstructionPointer(p) EA::Thread::GetInstructionPointer(p)
 			
-		#elif defined(__GNUC__) || defined(EA_COMPILER_CLANG) // This covers EA_PLATFORM_UNIX, EA_PLATFORM_OSX 
+		#elif defined(EA_COMPILER_GNUC) || defined(EA_COMPILER_CLANG) // This covers EA_PLATFORM_UNIX, EA_PLATFORM_OSX
 
 			// Even if there are compiler intrinsics that let you get the instruction pointer, 
 			// this function can still be useful. For example, on ARM platforms this function
@@ -289,7 +289,7 @@ namespace EA
 		EATHREADLIB_API void* GetStackLimit();
 
 
-		#if defined(_MSC_VER) && defined(EA_PROCESSOR_X86)
+		#if defined(EA_COMPILER_MSVC) && defined(EA_PROCESSOR_X86)
 			#define EASetStackBase()               \
 			{                                      \
 				void* esp;                         \
@@ -297,19 +297,19 @@ namespace EA
 				::EA::Thread::SetStackBase(esp);   \
 			}                               
 
-		#elif defined(_MSC_VER) && (defined(EA_PROCESSOR_X86_64) || defined(EA_PROCESSOR_ARM))
+		#elif defined(EA_COMPILER_MSVC) && (defined(EA_PROCESSOR_X86_64) || defined(EA_PROCESSOR_ARM))
 			// This implementation uses SetStackBase(NULL), which internally retrieves the stack pointer.
 			#define EASetStackBase()                     \
 			{                                            \
 				::EA::Thread::SetStackBase((void*)NULL); \
 			}                                            \
 
-		#elif defined(__ARMCC_VERSION)          // ARM compiler
+		#elif defined(EA_COMPILER_ARM)          // ARM compiler
 
 			#define EASetStackBase()  \
 				::EA::Thread::SetStackBase((void*)__current_sp())
 
-		#elif defined(__GNUC__) // This covers EA_PLATFORM_UNIX, EA_PLATFORM_OSX
+		#elif defined(EA_COMPILER_GNUC) // This covers EA_PLATFORM_UNIX, EA_PLATFORM_OSX
 
 			#define EASetStackBase()  \
 				::EA::Thread::SetStackBase((void*)__builtin_frame_address(0));

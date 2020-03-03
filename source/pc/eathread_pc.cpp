@@ -504,7 +504,7 @@ void* EA::Thread::GetThreadStackBase()
 }
 
 
-#if defined(EA_PLATFORM_WIN32) && defined(EA_PROCESSOR_X86) && defined(_MSC_VER) && (_MSC_VER >= 1400)
+#if defined(EA_PLATFORM_WIN32) && defined(EA_PROCESSOR_X86) && defined(EA_COMPILER_MSVC) && (EA_COMPILER_VERSION >= 1400)
 	// People report on the Internet that this function can get you what CPU the current thread
 	// is running on. But that's false, as this function has been seen to return values greater than
 	// the number of physical or real CPUs present. For example, this function returns 6 for my 
@@ -547,7 +547,7 @@ EATHREADLIB_API int EA::Thread::GetThreadProcessor()
 		if(pfnGetCurrentProcessorNumber)
 			return (int)(unsigned)pfnGetCurrentProcessorNumber();
 
-		#if defined(EA_PLATFORM_WINDOWS) && defined(EA_PROCESSOR_X86) && defined(_MSC_VER) && (_MSC_VER >= 1400)
+		#if defined(EA_PLATFORM_WINDOWS) && defined(EA_PROCESSOR_X86) && defined(EA_COMPILER_MSVC) && (EA_COMPILER_MSVC >= 1400)
 			return GetCurrentProcessorNumberXP();
 		#else
 			return 0;
@@ -676,8 +676,7 @@ namespace Internal {
 
 		jmp_buf jmpbuf;
 
-		__pragma(warning(push))
-		__pragma(warning(disable : 4611))
+		EA_DISABLE_VC_WARNING(4611)
 		if (!setjmp(jmpbuf))
 		{
 			ThreadNameInfo threadNameInfo = {0x1000, pName, threadId, 0};
@@ -685,7 +684,7 @@ namespace Internal {
 			__except (GetExceptionCode() == 0x406D1388 ? EXCEPTION_EXECUTE_HANDLER : EXCEPTION_CONTINUE_SEARCH) { }
 			longjmp(jmpbuf, 1);
 		}
-		__pragma(warning(pop))
+		EA_RESTORE_VC_WARNING()
 	}
 
 	void SetThreadName(EAThreadDynamicData* pTDD, const char* pName)
@@ -693,7 +692,7 @@ namespace Internal {
 		strncpy(pTDD->mName, pName, EATHREAD_NAME_SIZE);
 		pTDD->mName[EATHREAD_NAME_SIZE - 1] = 0;
 
-	#if defined(EA_PLATFORM_WINDOWS) && defined(_MSC_VER) || (defined(EA_PLATFORM_XBOXONE))
+	#if defined(EA_PLATFORM_WINDOWS) && defined(EA_COMPILER_MSVC) || (defined(EA_PLATFORM_XBOXONE))
 		if(pTDD->mName[0] && (pTDD->mhThread != EA::Thread::kThreadIdInvalid))
 		{
 			#if EATHREAD_NAMING == EATHREAD_NAMING_DISABLED
@@ -868,7 +867,7 @@ EATHREADLIB_API void EA::Thread::AssertionFailure(const char* pExpression)
 			OutputDebugStringA("EA::Thread::AssertionFailure: ");
 			OutputDebugStringA(pExpression);
 			OutputDebugStringA("\n");
-			#ifdef _MSC_VER
+			#ifdef EA_COMPILER_MSVC
 				__debugbreak();
 			#endif
 		#endif

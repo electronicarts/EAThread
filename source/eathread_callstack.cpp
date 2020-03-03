@@ -25,10 +25,10 @@
 	#if !defined(EA_PLATFORM_MICROSOFT)
 		#include "unix/eathread_pthread_stack_info.cpp"
 	#endif
-#elif (defined(EA_PLATFORM_LINUX) || defined(__CYGWIN__)) && (defined(EA_PROCESSOR_X86) || defined(EA_PROCESSOR_X86_64))
+#elif (defined(EA_PLATFORM_LINUX) || defined(EA_PLATFORM_CYGWIN)) && (defined(EA_PROCESSOR_X86) || defined(EA_PROCESSOR_X86_64))
 	#include "x86/eathread_callstack_x86.cpp"
 	#include "unix/eathread_pthread_stack_info.cpp"
-#elif defined(__GNUC__) || defined(EA_COMPILER_CLANG)
+#elif defined(EA_COMPILER_GNUC) || defined(EA_COMPILER_CLANG)
 	#include "unix/eathread_callstack_glibc.cpp"
 	#include "unix/eathread_pthread_stack_info.cpp"
 #else

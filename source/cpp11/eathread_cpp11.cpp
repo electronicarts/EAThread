@@ -47,7 +47,7 @@ namespace EA
 					std::thread::id stdId = std::this_thread::get_id();
 					EAT_COMPILETIME_ASSERT(sizeof(_Thrd_t) == sizeof(std::thread::id));
 					return ((_Thrd_t&)stdId)._Hnd;
-				#elif EA_POSIX_THREADS_AVAILABLE && defined(_YVALS)
+				#elif EA_POSIX_THREADS_AVAILABLE && defined(EA_HAVE_DINKUMWARE_CPP_LIBRARY)
 					std::thread::id stdId = std::this_thread::get_id();
 					EAT_COMPILETIME_ASSERT(sizeof(_Thrd_t) == sizeof(std::thread::id));
 					return reinterpret_cast<_Thrd_t>(stdId);

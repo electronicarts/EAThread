@@ -9,21 +9,14 @@
 
 #if defined(EA_PLATFORM_WIN32) && EA_WINAPI_FAMILY_PARTITION(EA_WINAPI_PARTITION_DESKTOP) // The following only works on Win32 and not Win64.
 
-#if defined(_MSC_VER)
-	#pragma warning(push, 0)
-#endif
-
+EA_DISABLE_ALL_VC_WARNINGS()
 #include <Windows.h>
 #include <DbgHelp.h>
 #include <stdio.h>
+EA_RESTORE_ALL_VC_WARNINGS()
 
-#if defined(_MSC_VER)
-	#pragma warning(pop)
-#endif
-
-
-#ifdef _MSC_VER
-	#pragma warning(disable: 4740)      // flow in or out of inline asm code suppresses global optimization
+EA_DISABLE_VC_WARNING(4740)      // flow in or out of inline asm code suppresses global optimization
+#ifdef EA_COMPILER_MSVC
 	#pragma comment(lib, "dbghelp.lib")
 	#pragma comment(lib, "psapi.lib")
 #endif
@@ -532,5 +525,6 @@ EATHREADLIB_API size_t GetCallstack(void* pReturnAddressArray[], size_t nReturnA
 } // namespace Thread
 } // namespace EA
 
-#endif // defined(EA_PLATFORM_WIN32)
+EA_RESTORE_VC_WARNING()
 
+#endif // defined(EA_PLATFORM_WIN32)

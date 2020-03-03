@@ -53,7 +53,7 @@
 	// We define EAReadBarrier here to be the same as EACompilerMemory barrier in order to limit the 
 	// compiler from making any assumptions at its level about memory usage. Year 2003+ versions of the 
 	// Microsoft SDK define a 'MemoryBarrier' statement which has the same effect as EAReadWriteBarrier.
-	#if defined(__GNUC__) && (((__GNUC__ * 100) + __GNUC_MINOR__) >= 401) // GCC 4.1 or later
+	#if defined(__GNUC__) && (((__GNUC__ * 100) + __GNUC_MINOR__) >= 401) // GCC 4.1 or later, includes clang
 		#define EAReadBarrier      __sync_synchronize
 		#define EAWriteBarrier     __sync_synchronize
 		#define EAReadWriteBarrier __sync_synchronize

@@ -24,10 +24,10 @@
 #endif
 
 #if defined(EA_COMPILER_MSVC) && defined(EA_PROCESSOR_X86_64)
-	#pragma warning(push, 0)
+	EA_DISABLE_ALL_VC_WARNINGS()
 	#include <math.h>   // VS2008 has an acknowledged bug that requires math.h (and possibly also string.h) to be #included before intrin.h.
 	#include <intrin.h>
-	#pragma warning(pop)
+	EA_RESTORE_ALL_VC_WARNINGS()
 #endif
 
 #if defined(EA_COMPILER_CLANG)
@@ -56,7 +56,7 @@ EATHREADLIB_API void ShutdownCallstack()
 }
 
 
-#if defined(_MSC_VER)
+#if defined(EA_COMPILER_MSVC)
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -237,7 +237,7 @@ EATHREADLIB_API size_t GetCallstack(void* pReturnAddressArray[], size_t nReturnA
 	return index;
 }
 
-#elif defined(__GNUC__) || defined(EA_COMPILER_CLANG)
+#elif defined(EA_COMPILER_GNUC) || defined(EA_COMPILER_CLANG)
 
 EATHREADLIB_API void GetInstructionPointer(void *&p)
 {
@@ -319,14 +319,14 @@ EATHREADLIB_API size_t GetCallstack(void* pReturnAddressArray[], size_t nReturnA
 			void** sp;
 			void** new_sp;
 
-			#if defined(__i386__)
+			#if defined(EA_PROCESSOR_X86)
 				// Stack frame format:
 				//    sp[0]   pointer to previous frame
 				//    sp[1]   caller address
 				//    sp[2]   first argument
 				//    ...
 				sp = (void**)&pReturnAddressArray - 2;
-			#elif defined(__x86_64__)
+			#elif defined(EA_PROCESSOR_X86_64)
 				// Arguments are passed in registers on x86-64, so we can't just offset from &pReturnAddressArray.
 				sp = (void**) __builtin_frame_address(0);
 			#endif

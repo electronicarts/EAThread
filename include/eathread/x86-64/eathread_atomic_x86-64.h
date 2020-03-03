@@ -19,16 +19,14 @@
 #include <eathread/internal/eathread_atomic_standalone.h>
 
 
-#ifdef _MSC_VER
-	#pragma warning(push, 0)
+#ifdef EA_COMPILER_MSVC
+	EA_DISABLE_ALL_VC_WARNINGS()
 	#include <math.h>   // VS2008 has an acknowledged bug that requires math.h (and possibly also string.h) to be #included before intrin.h.
 	#include <intrin.h>
-	#pragma warning(pop)
-
-	#pragma warning(push)
-	#pragma warning(disable: 4146)  // unary minus operator applied to unsigned type, result still unsigned
+	EA_RESTORE_ALL_VC_WARNINGS()
 #endif
 
+EA_DISABLE_VC_WARNING(4146)  // unary minus operator applied to unsigned type, result still unsigned
 
 #if defined(EA_PROCESSOR_X86_64)
 
@@ -41,7 +39,7 @@
 			///
 			/// Non-member 128-bit Atomics implementation 
 			///
-			#if (_MSC_VER >= 1500) // VS2008+
+			#if (EA_COMPILER_MSVC >= 1500) // VS2008+
 
 				#define EATHREAD_ATOMIC_128_SUPPORTED 1
 
@@ -72,7 +70,7 @@
 
 			#elif defined(EA_COMPILER_GNUC) || defined(EA_COMPILER_CLANG)
 
-				#if defined(EA_COMPILER_CLANG) || (defined(__GNUC__) && (((__GNUC__ * 100) + __GNUC_MINOR__) >= 403)) // GCC 4.3 or later for 128 bit atomics
+				#if defined(EA_COMPILER_CLANG) || (defined(EA_COMPILER_GNUC) && EA_COMPILER_VERSION >= 4003) // GCC 4.3 or later for 128 bit atomics
 
 					#define EATHREAD_ATOMIC_128_SUPPORTED 1
 
@@ -328,7 +326,7 @@
 			#elif defined(EA_COMPILER_GNUC) || defined(EA_COMPILER_CLANG)
 
 				// Recent versions of GCC have atomic primitives built into the compiler and standard library.
-				#if defined(EA_COMPILER_CLANG) || (defined(__GNUC__) && (((__GNUC__ * 100) + __GNUC_MINOR__) >= 401)) // GCC 4.1 or later
+				#if defined(EA_COMPILER_CLANG) || (defined(EA_COMPILER_GNUC) && EA_COMPILER_VERSION >= 4001) // GCC 4.1 or later
 
 					template <> inline
 					AtomicInt<int32_t>::ValueType AtomicInt<int32_t>::GetValue() const
@@ -440,23 +438,6 @@
 
 #endif // EA_PROCESSOR_X86_64
 
-
-#ifdef _MSC_VER
-	 #pragma warning(pop)
-#endif
-
+EA_RESTORE_VC_WARNING()
 
 #endif // EATHREAD_X86_64_EATHREAD_ATOMIC_X86_64_H
-
-
-
-
-
-
-
-
-
-
-
-
-

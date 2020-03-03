@@ -12,9 +12,9 @@
 	#include <errno.h>
 	#include <string.h>
 	#ifdef EA_PLATFORM_WINDOWS
-	  #pragma warning(push, 0)
+	  EA_DISABLE_ALL_VC_WARNINGS()
 	  #include <Windows.h> // Presumably we are using pthreads-win32.
-	  #pragma warning(pop)
+	  EA_RESTORE_ALL_VC_WARNINGS()
 		#ifdef CreateMutex
 			#undef CreateMutex // Windows #defines CreateMutex to CreateMutexA or CreateMutexW.
 		#endif
@@ -142,7 +142,7 @@
 		}
 		else
 		{
-			#if (defined(EA_PLATFORM_LINUX) || defined(EA_PLATFORM_WINDOWS)) && !defined(__CYGWIN__) && !defined(EA_PLATFORM_ANDROID)
+			#if (defined(EA_PLATFORM_LINUX) || defined(EA_PLATFORM_WINDOWS)) && !defined(EA_PLATFORM_CYGWIN) && !defined(EA_PLATFORM_ANDROID)
 				const timespec* pTimeSpec = &timeoutAbsolute;
 				result = pthread_mutex_timedlock(&mMutexData.mMutex, const_cast<timespec*>(pTimeSpec)); // Some pthread implementations use non-const timespec, so cast for them.
 

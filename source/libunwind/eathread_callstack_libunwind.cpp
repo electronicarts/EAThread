@@ -316,13 +316,13 @@ EATHREADLIB_API bool GetCallstackContext(CallstackContext& context, intptr_t thr
 		   (threadId == (intptr_t)EA::Thread::GetThreadId()))
 		{
 			// Note: the behavior below is inconsistent between platforms and needs to be made so.
-			#if defined(__ARMCC_VERSION) // If using the ARM Compiler...
+			#if defined(EA_COMPILER_ARM) // If using the ARM Compiler...
 				context.mSP           = (uint32_t)__current_sp();
 				context.mLR           = (uint32_t)__return_address();
 				context.mPC           = (uint32_t)__current_pc();
 				context.mStackPointer = context.mSP;
 
-			#elif defined(__GNUC__) || defined(EA_COMPILER_CLANG)                
+			#elif defined(EA_COMPILER_GNUC) || defined(EA_COMPILER_CLANG)
 				#if defined(EA_PROCESSOR_X86_64)
 					context.mRIP          = (uint64_t)__builtin_return_address(0);
 					context.mRSP          = (uint64_t)__builtin_frame_address(1);

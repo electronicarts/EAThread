@@ -35,7 +35,7 @@
 		return true;
 	}
 
-#elif defined(__APPLE__) && EATHREAD_MANUAL_FUTEX_ENABLED
+#elif defined(EA_PLATFORM_APPLE) && EATHREAD_MANUAL_FUTEX_ENABLED
 	#include <semaphore.h>
 	#include <stdio.h>
 	#include <errno.h>
@@ -180,7 +180,7 @@
 
 	void EA::Thread::Futex::DestroyFSemaphore()
 	{
-		#if defined (__APPLE__)
+		#if defined (EA_PLATFORM_APPLE)
 			sem_close(&mSemaphore);
 		#elif defined(EA_PLATFORM_ANDROID)
 			sem_destroy(&mSemaphore);   // Android's sem_destroy is broken. http://code.google.com/p/android/issues/detail?id=3106
@@ -222,9 +222,9 @@
 
 #elif defined(EA_PLATFORM_MICROSOFT) && !EA_USE_CPP11_CONCURRENCY && !EATHREAD_MANUAL_FUTEX_ENABLED
 
-	#pragma warning(push, 0)
+	EA_DISABLE_ALL_VC_WARNINGS()
 	#include <Windows.h>
-	#pragma warning(pop)
+	EA_RESTORE_ALL_VC_WARNINGS()
 
 	// Validate what we assume to be invariants.
 	EAT_COMPILETIME_ASSERT(sizeof(CRITICAL_SECTION) <= (EA::Thread::FUTEX_PLATFORM_DATA_SIZE / sizeof(uint64_t) * sizeof(uint64_t)));
@@ -243,9 +243,9 @@
 #elif defined(EA_PLATFORM_MICROSOFT) && EATHREAD_MANUAL_FUTEX_ENABLED
 
 	#if defined(EA_PLATFORM_WINDOWS)
-		#pragma warning(push, 0)
+		EA_DISABLE_ALL_VC_WARNINGS()
 		#include <Windows.h>
-		#pragma warning(pop)
+		EA_RESTORE_ALL_VC_WARNINGS()
 	#endif
 
 	void EA::Thread::Futex::CreateFSemaphore()

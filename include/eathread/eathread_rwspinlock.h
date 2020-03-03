@@ -17,11 +17,7 @@
 #include <eathread/eathread_atomic.h>
 #include <new>
 
-
-#ifdef _MSC_VER
-	 #pragma warning(push)
-	 #pragma warning(disable: 4100) // (Compiler claims pRWSpinLock is unreferenced)
-#endif
+EA_DISABLE_VC_WARNING(4100) // (Compiler claims pRWSpinLock is unreferenced)
 
 #if defined(EA_PRAGMA_ONCE_SUPPORTED)
 	#pragma once // Some compilers (e.g. VC++) benefit significantly from using this. We've measured 3-4% build speed improvements in apps as a result.
@@ -392,17 +388,6 @@ namespace EA
 
 } // namespace EA
 
-
-
-#ifdef _MSC_VER
-	#pragma warning(pop)
-#endif
-
+EA_RESTORE_VC_WARNING()
 
 #endif // EATHREAD_EATHREAD_RWSPINLOCK_H
-
-
-
-
-
-

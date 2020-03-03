@@ -18,9 +18,10 @@
 #include <eathread/eathread_semaphore.h>
 
 
-#ifdef _MSC_VER
-#pragma warning(push, 0)
+#ifdef EA_PLATFORM_MICROSOFT
+EA_DISABLE_ALL_VC_WARNINGS()
 #include <Windows.h>
+EA_RESTORE_ALL_VC_WARNINGS()
 #endif
 
 

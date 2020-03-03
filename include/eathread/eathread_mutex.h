@@ -13,7 +13,7 @@
 #ifndef EATHREAD_EATHREAD_MUTEX_H
 #define EATHREAD_EATHREAD_MUTEX_H
 
-#if defined(_MSC_VER)
+#if defined(EA_COMPILER_MSVC)
 #include <math.h>   // #include math.h because VC++ has a header file but that requires math.h to be #included before some other headers, lest you get a warning.
 #endif
 #include <stddef.h>
