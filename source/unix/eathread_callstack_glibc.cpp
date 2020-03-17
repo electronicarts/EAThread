@@ -228,7 +228,7 @@ EATHREADLIB_API void SetStackBase(void* pStackBase)
 //
 EATHREADLIB_API void* GetStackBase()
 {
-	#if defined(EA_PLATFORM_UNIX)
+	#if defined(EA_PLATFORM_UNIX) || defined(EA_PLATFORM_MINGW)
 		void* pBase;
 		if(GetPthreadStackInfo(&pBase, NULL))
 			return pBase;
@@ -246,7 +246,7 @@ EATHREADLIB_API void* GetStackBase()
 //
 EATHREADLIB_API void* GetStackLimit()
 {
-	#if defined(EA_PLATFORM_UNIX)
+	#if defined(EA_PLATFORM_UNIX) || defined(EA_PLATFORM_MINGW)
 		void* pLimit;
 		if(GetPthreadStackInfo(NULL, &pLimit))
 			return pLimit;

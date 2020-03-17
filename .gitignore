@@ -1,3 +1,8 @@
 ctags
 /build/
 build.bat
+
+# vim temporaries
+*.swp
+*.un~
+*.~
