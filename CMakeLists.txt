@@ -23,8 +23,6 @@ add_library(EAThread ${EATHREAD_SOURCES})
 
 if(EATHREAD_BUILD_TESTS)
     add_subdirectory(test)
-else()
-    add_subdirectory(test/packages/EABase)
 endif()
 
 #-------------------------------------------------------------------------------------------
@@ -37,9 +35,5 @@ add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 # Export Include Directories
 #-------------------------------------------------------------------------------------------
 target_include_directories(EAThread PUBLIC include)
-
-#-------------------------------------------------------------------------------------------
-# Package Dependencies 
-#-------------------------------------------------------------------------------------------
-target_link_libraries(EAThread EABase)
+target_include_directories(EAThread PRIVATE ../EABase/include/Common)
 

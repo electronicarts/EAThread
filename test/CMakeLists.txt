@@ -51,7 +51,7 @@ add_subdirectory(packages/EAStdC)
 add_subdirectory(packages/EATest)
 
 target_link_libraries(EAThreadTest EAAssert)
-target_link_libraries(EAThreadTest EABase)
+)
 target_link_libraries(EAThreadTest EAMain)
 target_link_libraries(EAThreadTest EASTL)
 target_link_libraries(EAThreadTest EAStdC)
