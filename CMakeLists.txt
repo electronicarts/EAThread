@@ -37,7 +37,7 @@ add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 # Export Include Directories
 #-------------------------------------------------------------------------------------------
 target_include_directories(EAThread PUBLIC include)
-
+target_include_directories(EAThread PRIVATE ../EABase/include/Common)
 #-------------------------------------------------------------------------------------------
 # Package Dependencies 
 #-------------------------------------------------------------------------------------------
