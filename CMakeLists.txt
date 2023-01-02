@@ -24,7 +24,9 @@ add_library(EAThread ${EATHREAD_SOURCES})
 if(EATHREAD_BUILD_TESTS)
     add_subdirectory(test)
 else()
-    add_subdirectory(test/packages/EABase)
+    if (NOT TARGET EABase)
+        add_subdirectory(test/packages/EABase)
+    endif()
 endif()
 
 #-------------------------------------------------------------------------------------------
