@@ -5,7 +5,7 @@
 #-------------------------------------------------------------------------------------------
 # CMake info
 #-------------------------------------------------------------------------------------------
-cmake_minimum_required(VERSION 3.11)
+cmake_minimum_required(VERSION 3.14)
 project(EAThreadTest CXX)
 include(CTest)
 
@@ -20,7 +20,6 @@ add_definitions(-DEA_OPENSOURCE)
 #-------------------------------------------------------------------------------------------
 # Compiler Flags
 #-------------------------------------------------------------------------------------------
-set (CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/packages/EASTL/scripts/CMake")
 include(CommonCppFlags)
 
 # Parts of the test suite fail to compile if char8_t is enabled, so we disable it
@@ -51,7 +50,7 @@ target_include_directories(EAThreadTest PUBLIC include)
 FetchContent_Declare(
   EABase
   GIT_REPOSITORY https://github.com/electronicarts/EABase.git
-  GIT_TAG        521cb053d9320636f53226ffc616216cf532f0ef
+  GIT_TAG        123363eb82e132c0181ac53e43226d8ee76dea12
   GIT_SUBMODULES "" # This should be temporary until we update the cyclic submodule dependencies in EABase.
 )
 
@@ -97,7 +96,7 @@ target_link_libraries(EAThreadTest EATest)
 FetchContent_Declare(
   EASTL
   GIT_REPOSITORY https://github.com/electronicarts/EASTL.git
-  GIT_TAG        05f4b4aef33f2f3ded08f19fa97f5a27ff35ff9f
+  GIT_TAG        7fadbf0da01e6f6e0e7038b1b34343a069b8fc51
   GIT_SUBMODULES "" # This should be temporary until we update the cyclic submodule dependencies in EASTL.
 )
 FetchContent_MakeAvailable(EASTL)
