@@ -1,3 +1,0 @@
-[submodule "test/packages/EABase"]
-	path = test/packages/EABase
-	url = git@github.com:electronicarts/EABase.git
