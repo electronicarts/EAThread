@@ -7,7 +7,7 @@
 #include <EABase/eahave.h>
 #include <eathread/eathread.h>
 #include <eathread/eathread_thread.h>
-
+#include <eathread/eathread_storage.h>
 
 #if defined(EA_PLATFORM_UNIX) || EA_POSIX_THREADS_AVAILABLE
 	#include <pthread.h>
@@ -155,7 +155,7 @@
 			if(result == 0)
 			{
 				// Cygwin does not support any scheduling policy other than SCHED_OTHER.
-				#if !defined(EA_PLATFORM_CYGWIN)
+				#if !defined(EA_PLATFORM_CYGWIN) && !defined(EA_PLATFORM_MINGW)
 					if(policy == SCHED_OTHER)
 						policy = SCHED_FIFO;
 				#endif
@@ -203,10 +203,17 @@
 			thr_stksegment(&s);
 			return s.ss_sp;  // Note that this is not the sp pointer (which would refer to the a location low in the stack address space). When returned by thr_stksegment(), ss_sp refers to the top (base) of the stack.
 
-		#elif defined(EA_PLATFORM_CYGWIN)
-			// Cygwin reserves pthread_attr_getstackaddr and pthread_attr_getstacksize for future use.
-			// The solution here is probably to use the Windows implementation of this here.
-			return 0;
+		#elif defined(EA_PLATFORM_CYGWIN) || defined(EA_PLATFORM_MINGW)
+			// libwinpthreads reserves pthread_attr_getstackaddr and pthread_attr_getstacksize for future use.
+			// So we currently use a Windows implementation here.
+
+			#if defined(EA_PROCESSOR_X86)
+				NT_TIB *pTIB = reinterpret_cast<NT_TIB*>(NtCurrentTeb());
+			#else // defined(EA_PROCESSOR_X64)
+				NT_TIB64* pTIB = reinterpret_cast<NT_TIB64*>(NtCurrentTeb());
+			#endif
+
+			return reinterpret_cast<void*>(pTIB->StackBase);
 
 		#else // Other Unix
 			void*     stackLow = NULL;
@@ -241,23 +248,22 @@
 	{
 		// Posix threading doesn't have the ability to set the processor.
 		#if defined(EA_PLATFORM_WINDOWS)
-			static int nProcessorCount = 0; // This doesn't really need to be an atomic integer.
+			static const int nProcessorCount = GetProcessorCount();
 
-			if(nProcessorCount == 0)
+			if(nProcessor < 0)
+				nProcessor = MAXIMUM_PROCESSORS; // This cases the SetThreadIdealProcessor to reset to 'no ideal processor'.
+			else
 			{
-				SYSTEM_INFO systemInfo;
-				memset(&systemInfo, 0, sizeof(systemInfo));
-				GetSystemInfo(&systemInfo);
-				nProcessorCount = (int)systemInfo.dwNumberOfProcessors;
+				if(nProcessor >= nProcessorCount)
+					nProcessor %= nProcessorCount;
 			}
 
-			DWORD dwThreadAffinityMask;
-
-			if((nProcessor < 0) || (nProcessor >= nProcessorCount))
-				dwThreadAffinityMask = 0xffffffff;
-			else
-				dwThreadAffinityMask = 1 << nProcessor;
-			SetThreadAffinityMask(GetCurrentThread(), dwThreadAffinityMask);
+			// SetThreadIdealProcessor differs from SetThreadAffinityMask in that SetThreadIdealProcessor is not
+			// a strict assignment, and it allows the OS to move the thread if the ideal processor is busy.
+			// SetThreadAffinityMask is a more rigid assignment, but it can result in slower performance and
+			// possibly hangs due to processor contention between threads. For Windows we use SetIdealThreadProcessor
+			// in the name of safety and likely better overall performance.
+			SetThreadIdealProcessor(GetCurrentThread(), (DWORD)nProcessor);
 
 		#elif (defined(EA_PLATFORM_LINUX) && !defined(EA_PLATFORM_ANDROID)) || defined(CS_UNDEFINED_STRING)
 			cpu_set_t cpus;
@@ -284,42 +290,85 @@
 	}
 
 
-	#if defined(EA_PLATFORM_WINDOWS) && defined(EA_PROCESSOR_X86) && defined(EA_COMPILER_MSVC) && (EA_COMPILER_VERSION >= 1400)
-		int GetCurrentProcessorNumberXP()
+	#if defined(EA_PLATFORM_WIN32) && defined(EA_PROCESSOR_X86) && defined(EA_COMPILER_MSVC) && (EA_COMPILER_VERSION >= 1400)
+		// People report on the Internet that this function can get you what CPU the current thread
+		// is running on. But that's false, as this function has been seen to return values greater than
+		// the number of physical or real CPUs present. For example, this function returns 6 for my
+		// Single CPU that's dual-hyperthreaded.
+		static int GetCurrentProcessorNumberCPUID()
 		{
 			_asm { mov eax, 1   }
 			_asm { cpuid        }
 			_asm { shr ebx, 24  }
 			_asm { mov eax, ebx }
 		}
-	#endif
 
+		int GetCurrentProcessorNumberXP()
+		{
+			int cpuNumber = GetCurrentProcessorNumberCPUID();
+			int cpuCount  = EA::Thread::GetProcessorCount();
+
+			return (cpuNumber % cpuCount); // I don't know if this is the right thing to do, but it's better than returning an impossible number and Windows XP is a fading OS as it is.
+		}
+
+	#endif
 
 	int EA::Thread::GetThreadProcessor()
 	{
 		#if defined(EA_PLATFORM_WINDOWS)
 			// We are using Posix threading on Windows. It happens to be mapped to Windows threading and
 			// so we can use Windows facilities to tell what processor the thread is running on.
-			// Only Windows Vista and later provides GetCurrentProcessorNumber.
-			// So we must dynamically link to this function.
-			static EA_THREAD_LOCAL  bool           bInitialized = false;
-			static EA_THREAD_LOCAL  DWORD (WINAPI *pfnGetCurrentProcessorNumber)() = NULL;
+			#if defined(EA_PLATFORM_WIN32)
+				// Only Windows Vista and later provides GetCurrentProcessorNumber.
+				// So we must dynamically link to this function.
+				static EA_THREAD_LOCAL bool           bInitialized = false;
+				static EA_THREAD_LOCAL DWORD (WINAPI *pfnGetCurrentProcessorNumber)() = NULL;
 
-			if(!bInitialized)
-			{
-				HMODULE hKernel32 = GetModuleHandle("KERNEL32.DLL");
-				if(hKernel32)
-					pfnGetCurrentProcessorNumber = (DWORD (WINAPI*)())GetProcAddress(hKernel32, "GetCurrentProcessorNumber");
-				bInitialized = true;
-			}
+				if(!bInitialized)
+				{
+					HMODULE hKernel32 = GetModuleHandleA("KERNEL32.DLL");
+					if(hKernel32)
+						pfnGetCurrentProcessorNumber =
+							(DWORD (WINAPI*)())(uintptr_t)GetProcAddress(
+									hKernel32,
+									"GetCurrentProcessorNumber");
 
-			if(pfnGetCurrentProcessorNumber)
-				return (int)(unsigned)pfnGetCurrentProcessorNumber();
+					bInitialized = true;
+				}
 
-			#if defined(EA_PLATFORM_WINDOWS) && defined(EA_PROCESSOR_X86) && defined(EA_COMPILER_MSVC) && (EA_COMPILER_VERSION >= 1400)
-				return GetCurrentProcessorNumberXP();
-			#else
+				if(pfnGetCurrentProcessorNumber)
+					return (int)(unsigned)pfnGetCurrentProcessorNumber();
+
+				#if defined(EA_PLATFORM_WINDOWS) && defined(EA_PROCESSOR_X86) && defined(EA_COMPILER_MSVC) && (EA_COMPILER_MSVC >= 1400)
+					return GetCurrentProcessorNumberXP();
+				#else
+					return 0;
+				#endif
+
+			#elif defined(EA_PLATFORM_WIN64)
+				static EA_THREAD_LOCAL bool           bInitialized = false;
+				static EA_THREAD_LOCAL DWORD (WINAPI *pfnGetCurrentProcessorNumber)() = NULL;
+
+				if(!bInitialized)
+				{
+					HMODULE hKernel32 = GetModuleHandleA("KERNEL32.DLL"); // Yes, we want to use Kernel32.dll. There is no Kernel64.dll on Win64.
+					if(hKernel32)
+						pfnGetCurrentProcessorNumber =
+							(DWORD (WINAPI*)())(uintptr_t)GetProcAddress(
+									hKernel32,
+									"GetCurrentProcessorNumber");
+
+					bInitialized = true;
+				}
+
+				if(pfnGetCurrentProcessorNumber)
+					return (int)(unsigned)pfnGetCurrentProcessorNumber();
+
 				return 0;
+
+			#else
+				return (int)(unsigned)GetCurrentProcessorNumber();
+
 			#endif
 
 		#elif defined(EA_PLATFORM_ANDROID)
@@ -367,7 +416,7 @@
 		{
 			pTDD->mnThreadAffinityMask = nAffinityMask;
 	
-			#if EATHREAD_THREAD_AFFINITY_MASK_SUPPORTED
+			#if EATHREAD_THREAD_AFFINITY_MASK_SUPPORTED && !defined(EA_PLATFORM_WINDOWS)
 				cpu_set_t cpuSetMask;
 				memset(&cpuSetMask, 0, sizeof(cpu_set_t));
 
@@ -382,6 +431,27 @@
 					sched_setaffinity(pTDD->mThreadPid, sizeof(cpu_set_t), &cpuSetMask);
 			#endif
 		}
+
+	#if EATHREAD_THREAD_AFFINITY_MASK_SUPPORTED && defined(EA_PLATFORM_WINDOWS)
+		// Call the Windows library function.
+		DWORD_PTR nProcessorCountMask = (DWORD_PTR)1 << GetProcessorCount();
+		DWORD_PTR nProcessAffinityMask, nSystemAffinityMask;
+
+		if(EA_LIKELY(GetProcessAffinityMask(GetCurrentProcess(), &nProcessAffinityMask, &nSystemAffinityMask)))
+			nProcessorCountMask = nProcessAffinityMask;
+
+		nAffinityMask &= nProcessorCountMask;
+
+		void *winThreadId = pthread_gethandle(pTDD->mThreadId);
+		EAT_ASSERT(winThreadId);
+
+		auto opResult = ::SetThreadAffinityMask(winThreadId, static_cast<DWORD_PTR>(nAffinityMask));
+		EA_UNUSED(opResult);
+		EAT_ASSERT_FORMATTED(
+			opResult != 0,
+			"The Windows (pthreads) platform SetThreadAffinityMask failed. GetLastError %x",
+			GetLastError());
+	#endif
 	}
 	
 	
@@ -578,9 +648,9 @@
 		#if defined(EA_PLATFORM_WINDOWS)
 			// There is no nanosleep on Windows, but there is Sleep.
 			if(timeRelative == kTimeoutImmediate)
-				Sleep(0);
+				SwitchToThread();
 			else
-				Sleep((unsigned)((timeRelative.tv_sec * 1000) + (((timeRelative.tv_nsec % 1000) * 1000000))));
+				SleepEx((unsigned)((timeRelative.tv_sec * 1000) + (timeRelative.tv_nsec / 1000000)), TRUE);
 		#else
 			if(timeRelative == kTimeoutImmediate)
 			{

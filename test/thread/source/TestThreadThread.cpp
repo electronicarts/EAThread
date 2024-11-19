@@ -899,7 +899,8 @@ int TestThreadThread()
 
 
 	#if defined(EA_PLATFORM_WINDOWS) && !EA_USE_CPP11_CONCURRENCY
-	{ // Try to reproduce Windows problem with Thread::GetStatus returning kStatusEnded when it should return kStatusRunning.
+	{
+		// Try to reproduce Windows problem with Thread::GetStatus returning kStatusEnded when it should return kStatusRunning.
 		// On my current work machine (WinXP32, Single P4 CPU) this problem doesn't occur. But it might occur with others.
 		Thread::Status status;
 		Thread         threadBackground[8];
@@ -910,6 +911,7 @@ int TestThreadThread()
 
 		EA::Thread::SetThreadPriority(kThreadPriorityDefault + 2);
 		thread.Begin(TestFunction1);
+		ThreadSleep(10); // It's possible the thread hasn't started yet, so wait to make sure it has.
 		status = thread.GetStatus();
 		EA::Thread::SetThreadPriority(kThreadPriorityDefault);
 

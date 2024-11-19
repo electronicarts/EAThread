@@ -323,7 +323,7 @@ namespace EA
 
 		#endif
 
-		#if defined(EA_PLATFORM_UNIX) || defined(EA_PLATFORM_APPLE) || defined(EA_PLATFORM_SONY)
+		#if defined(EA_PLATFORM_UNIX) || defined(EA_PLATFORM_APPLE) || defined(EA_PLATFORM_SONY) || defined(EA_PLATFORM_MINGW)
 			// GetPthreadStackInfo
 			//
 			// With some implementations of pthread, the stack base is returned by pthread as NULL if it's the main thread,

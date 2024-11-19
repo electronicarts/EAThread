@@ -114,7 +114,7 @@ EA_RESTORE_VC_WARNING()
 // Defined as 0 or 1
 //
 #ifndef EA_POSIX_THREADS_AVAILABLE
-	#if defined(EA_PLATFORM_UNIX) || defined(EA_PLATFORM_LINUX) || defined(EA_PLATFORM_APPLE)
+	#if defined(EA_PLATFORM_UNIX) || defined(EA_PLATFORM_LINUX) || defined(EA_PLATFORM_APPLE) || defined(EA_PLATFORM_MINGW)
 		#define EA_POSIX_THREADS_AVAILABLE 1
 	#elif defined(EA_PLATFORM_SONY)
 	   #define EA_POSIX_THREADS_AVAILABLE 0  // POSIX threading API is present but use is discouraged by Sony.  They want shipping code to use their scePthreads* API.
@@ -484,9 +484,9 @@ EA_RESTORE_VC_WARNING()
 		#define EATHREAD_GETCALLSTACK_SUPPORTED 1
 	#elif defined(EA_PLATFORM_WINDOWS_PHONE) && defined(EA_PROCESSOR_ARM)       
 		#define EATHREAD_GETCALLSTACK_SUPPORTED 0
-	#elif defined(EA_PLATFORM_MICROSOFT)
+	#elif defined(EA_PLATFORM_MICROSOFT) && !defined(EA_PLATFORM_MINGW)
 		#define EATHREAD_GETCALLSTACK_SUPPORTED 1
-	#elif defined(EA_PLATFORM_LINUX)
+	#elif defined(EA_PLATFORM_LINUX) && !defined(EA_PLATFORM_CYGWIN)
 		#define EATHREAD_GETCALLSTACK_SUPPORTED 1
 	#elif defined(EA_PLATFORM_OSX)
 		#define EATHREAD_GETCALLSTACK_SUPPORTED 1
@@ -537,7 +537,7 @@ EA_RESTORE_VC_WARNING()
 	#elif defined(EA_PLATFORM_SONY)
 		#define EATHREAD_THREAD_AFFINITY_MASK_SUPPORTED 1
 	#elif defined(EA_USE_CPP11_CONCURRENCY) && EA_USE_CPP11_CONCURRENCY
-		// CPP11 doesn't not provided a mechanism to set thread affinities.
+		// CPP11 doesn't provide a mechanism to set thread affinities.
 		#define EATHREAD_THREAD_AFFINITY_MASK_SUPPORTED 0
 	#elif defined(EA_PLATFORM_ANDROID) || defined(EA_PLATFORM_APPLE) || defined(EA_PLATFORM_UNIX)
 		#define EATHREAD_THREAD_AFFINITY_MASK_SUPPORTED 0
