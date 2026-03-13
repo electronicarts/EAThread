@@ -44,7 +44,15 @@ namespace Thread
 		RtlCaptureContext(&context);
 
 		// Possibly use the __emit intrinsic. http://msdn.microsoft.com/en-us/library/ms933778.aspx
-		pInstruction = (void*)(uintptr_t)context.___; // To do.
+		#if defined(EA_PROCESSOR_ARM64)
+			#if defined(EA_TARGET_ARCHITECTURE_ARM64)
+				pInstruction = (void*)context.Pc;
+			#else //EA_TARGET_ARCHITECTURE_ARM64EC
+				pInstruction = (void*)context.Rip;
+			#endif
+		#else
+			pInstruction = (void*)(uintptr_t)context.___; // To do.
+		#endif
 	}
 #elif defined(EA_COMPILER_GNUC) || defined(EA_COMPILER_CLANG)
 	EATHREADLIB_API void GetInstructionPointer(void*& pInstruction)
@@ -189,15 +197,37 @@ EATHREADLIB_API void ShutdownCallstack()
 				context.mPC = (uintptr_t)p;
 
 			#elif defined(EA_PLATFORM_WINDOWS) && EA_WINAPI_FAMILY_PARTITION(EA_WINAPI_PARTITION_DESKTOP)
-				// Possibly use the __emit intrinsic. Do this by making a __declspec(naked) function that 
-				// does nothing but return r14 (move r14 to r0). Need to know the opcode for that.
-				// http://msdn.microsoft.com/en-us/library/ms933778.aspx
-				#error Need to complete this somehow.
-				context.mFP = 0; 
-				context.mLR = 0;
-				context.mSP = 0;
-				GetInstructionPointer(p); // Intentionally don't call EAGetInstructionPointer, because it won't set the Thumb bit it this is Thumb code.
-				context.mPC = (uintptr_t)p;
+				#if defined(EA_PROCESSOR_ARM64)
+					CONTEXT context_ = {};
+					RtlCaptureContext(&context_);
+
+					#if defined(EA_TARGET_ARCHITECTURE_ARM64)
+						context.mFP = context_.Fp;
+						context.mLR = context_.Lr;
+						context.mSP = context_.Sp;
+						GetInstructionPointer(p);   // Intentionally don't call EAGetInstructionPointer, because it won't set the
+													// Thumb bit it this is Thumb code.
+						context.mPC = (uintptr_t)p;
+					#elif defined(EA_TARGET_ARCHITECTURE_ARM64EC)
+						context.mFP = context_.Rbp;
+						context.mLR = (uint64_t)_ReturnAddress(); 	// In MSVC (Microsoft Visual C++), the equivalent to GCC's __builtin_return_address is the _ReturnAddress() intrinsic.
+						context.mSP = context_.Rsp;
+						GetInstructionPointer(p);   // Intentionally don't call EAGetInstructionPointer, because it won't set the
+													// Thumb bit it this is Thumb code.
+						context.mPC = (uintptr_t)p;						
+					#endif
+				#else
+					// Possibly use the __emit intrinsic. Do this by making a __declspec(naked) function that 
+					// does nothing but return r14 (move r14 to r0). Need to know the opcode for that.
+					// http://msdn.microsoft.com/en-us/library/ms933778.aspx
+					#error Need to complete this somehow.
+					context.mFP = 0;
+					context.mLR = 0;
+					context.mSP = 0;
+					GetInstructionPointer(p);   // Intentionally don't call EAGetInstructionPointer, because it won't set the
+												// Thumb bit it this is Thumb code.
+					context.mPC = (uintptr_t)p;
+				#endif
 			#endif
 		}
 
